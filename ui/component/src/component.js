@@ -144,7 +144,7 @@ var Component = Module.extend({
 			;
 
 		tmpl.all(data);
-		dom = that.__domObj = $(tmpl._nodeList);
+		dom = that.__domObj = $(tmpl.getNodeList());
 
 		id = that.__domId = 
 			that.__domId || 
@@ -191,7 +191,7 @@ var Component = Module.extend({
 			tmpl.update('', that.__data);
 		}
 
-		dom = that.__domObj = $(tmpl._nodeList);
+		dom = that.__domObj = $(tmpl.getNodeList());
 		dom.attr('id', that.__domId);
 		dom.attr('name', that.__domName);
 		

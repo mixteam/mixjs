@@ -538,8 +538,11 @@ var View = Class.create({
 			viewport, fragment
 			;
 
+		tmpl.all(data);
+		
 		viewport = that.getViewport();
-		viewport.html(tmpl.all(data));
+		viewport.html('');
+		viewport.append(tmpl.getNodeList());
 
 		that.log('renderd');	
 	},

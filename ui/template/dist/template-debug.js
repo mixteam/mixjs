@@ -112,6 +112,20 @@ var Template = Class.create({
 		}
 	},
 
+	getHtml : function() {
+		var that = this
+			;
+
+		return that._html;
+	},
+
+	getNodeList : function() {
+		var that = this
+			;
+
+		return that._nodeList.slice(0);
+	},
+
 	_wrap : function(html) {
 		var that = this,
 			name = that._name,
@@ -222,7 +236,7 @@ var Template = Class.create({
 		var that =  this,
 			template = doc.createElement('template'),
 			split, chunk, chunkName,
-			data, partial, last
+			data, last
 			;
 
 		split = (typeof path === 'string' ? path.split(/[.\/]/g) : path);
@@ -231,16 +245,15 @@ var Template = Class.create({
 			chunkName = split.shift();
 			chunk = that._chunks[chunkName];
 
-			if (chunk) {
+			if (chunk) {	// 更新的是某个chunk
 				that._partials[chunkName] = 
 					chunk.update(split, chunkData);
 
 				that._html = that._template2({}, {
 					partials : that._partials
 				});
-			} else {
-				data = that._data;
-				split.unshift(chunkName);
+			} else {	// 更新的是某个chunk中的部分数据
+				data = that._data[chunkName];
 				last = split.pop();
 
 				Object.each(split, function(key) {
@@ -248,17 +261,17 @@ var Template = Class.create({
 				});
 				data[last] = chunkData;
 
-				that.all(data);
-				that._replace(partial);
+				that.all();
+				that._replace();
 			}
-		} else {
+		} else {	// 没有path的情况下，会更新整个模版
 			data = that._data;
 			if (Object.keys(data).length !== Object.keys(chunkData).length) {
 				chunkData = Object.extend({}, data, chunkData);
 			}
 
 			that.all(chunkData);
-			that._replace(partial);
+			that._replace();
 		}
 
 		return that._html;
