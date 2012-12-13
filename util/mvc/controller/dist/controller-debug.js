@@ -35,6 +35,7 @@ var Controller = Class.create({
 		Message.prototype.initialize.call(that, 'controller.' + name);
 
 		that._appname = name;
+		that._routename = undef;
 		that._views = {};
 
 		that.on('install', function() {
@@ -93,7 +94,7 @@ var Controller = Class.create({
 		});
 	},
 
-	_routeHandler : function(appname, subject) {
+	_routeHandler : function(appname, routename) {
 		var that = this,
 			state = router.getState(),
 			params = state.params.slice(0)
@@ -101,16 +102,34 @@ var Controller = Class.create({
 
 		if (that._appname !== appname) return;
 
-		params.unshift('route:' + subject);
+		that._routename = routename;
+		params.unshift('route:' + routename);
 
 		that.trigger.apply(that, params);
 	},
 
+	/**
+	 * @deprecated Since version v0.3. You should now use getAppName
+	 */
 	getName : function() {
 		var that = this
 			;
 
 		return that._appname;
+	},
+
+	getAppName : function() {
+		var that = this
+			;
+
+		return that._appname;
+	},
+
+	getRouteName : function() {
+		var that = this
+			;
+
+		return that._routename;
 	},
 
 	getViewport : function() {
@@ -149,7 +168,7 @@ var Controller = Class.create({
 			state = router.getState(),
 			params = state.params,
 			paramKeys = state.paramKeys,
-			index = paramKeys[name]
+			index = Object.isTypeof(name, 'number') ? name : paramKeys[name]
 			;
 
 		if (index != undef) {

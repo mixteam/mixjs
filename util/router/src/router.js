@@ -38,8 +38,7 @@ var Class = require('class'),
 		},
 
 		_routeToRegExp : function(route) {
-			route = route.replace(escapeRegExp, '\\$&')
-				.replace(namedParam, '([^\/]+)')
+			route = route.replace(namedParam, '([^\/][^\/]*?)')
 				.replace(splatParam, '(.*?)');
 			return new RegExp('^' + route + '(!.*?)?$');
 		},
@@ -188,7 +187,7 @@ var Class = require('class'),
 					;
 
 				params && that._replaceState(name, params, paramKeys);
-			});
+			}, true);
 		},
 
 		removeRoute : function(route) {

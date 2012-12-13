@@ -38,8 +38,7 @@ var Class = require('mix/core/base/class/1.0.0/class-debug'),
 		},
 
 		_routeToRegExp : function(route) {
-			route = route.replace(escapeRegExp, '\\$&')
-				.replace(namedParam, '([^\/]+)')
+			route = route.replace(namedParam, '([^\/][^\/]*?)')
 				.replace(splatParam, '(.*?)');
 			return new RegExp('^' + route + '(!.*?)?$');
 		},
@@ -188,7 +187,7 @@ var Class = require('mix/core/base/class/1.0.0/class-debug'),
 					;
 
 				params && that._replaceState(name, params, paramKeys);
-			});
+			}, true);
 		},
 
 		removeRoute : function(route) {

@@ -61,10 +61,6 @@ var History = Class.create({
 		return fragment.replace(routeStripper, '');
     },
 
-    _cacheMatchs : function() {
-
-    },
-
     _resetMatchs : function() {
     	var that = this,
     		handlers = that._handlers
@@ -152,21 +148,27 @@ var History = Class.create({
 
 		that._fragment = fragment = fragment || that._getFragment();
 
-		handlers.forEach(function(handler) {
+
+		for (var i = 0; i < handlers.length; i++) {
+			var handler = handlers[i];
+
 			if(!handler.matched && 
-				handler.route.test(fragment)) {
+					handler.route.test(fragment)) {
 				handler.matched = true;
 				handler.callback(fragment);
+				if (handler.last) {
+					return;
+				}
 			}
-		});
+		}
     },
 
-    route: function(route, callback) {
+    route: function(route, callback, last) {
     	var that = this,
     		handlers = that._handlers
     		;
 
-		handlers.push({route: route, callback: callback, matched : false});
+		handlers.push({route: route, callback: callback, matched : false, last : !!last});
     },
 
     remove : function(route, callback) {
