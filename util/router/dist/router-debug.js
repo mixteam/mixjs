@@ -187,7 +187,7 @@ var Class = require('mix/core/base/class/1.0.0/class-debug'),
 					;
 
 				params && that._replaceState(name, params, paramKeys);
-			});
+			}, true);
 		},
 
 		removeRoute : function(route) {

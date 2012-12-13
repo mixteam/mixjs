@@ -156,17 +156,19 @@ var History = Class.create({
 					handler.route.test(fragment)) {
 				handler.matched = true;
 				handler.callback(fragment);
-				return;
+				if (handler.last) {
+					return;
+				}
 			}
 		}
     },
 
-    route: function(route, callback) {
+    route: function(route, callback, last) {
     	var that = this,
     		handlers = that._handlers
     		;
 
-		handlers.push({route: route, callback: callback, matched : false});
+		handlers.push({route: route, callback: callback, matched : false, last : !!last});
     },
 
     remove : function(route, callback) {

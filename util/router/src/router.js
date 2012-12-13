@@ -187,7 +187,7 @@ var Class = require('class'),
 					;
 
 				params && that._replaceState(name, params, paramKeys);
-			});
+			}, true);
 		},
 
 		removeRoute : function(route) {
