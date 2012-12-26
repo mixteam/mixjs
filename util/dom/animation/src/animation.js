@@ -93,6 +93,8 @@ var Selector = require('selector')
     }
 
     testEl = null
+	
+	module.exports = $
 })(Selector)
 
 //normal animation
@@ -163,6 +165,8 @@ var Selector = require('selector')
     $.extend($.fn, {
         speeds: speeds
     })
+	
+	module.exports = $
 
 })(Selector)
 
