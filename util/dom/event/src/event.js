@@ -225,6 +225,8 @@ var Selector = require('selector')
         event.initEvent(type, bubbles, true, null, null, null, null, null, null, null, null, null, null, null, null)
         return event
     }
+	
+	module.exports = $
 
 })(Selector)
 

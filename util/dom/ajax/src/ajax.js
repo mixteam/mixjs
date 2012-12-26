@@ -314,6 +314,8 @@ var Selector = require('selector')
         serialize(params, obj, traditional)
         return params.join('&').replace('%20', '+')
     }
+	
+	module.exports = $
 })(Selector)
 
 });
