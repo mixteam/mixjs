@@ -10,16 +10,9 @@
 //
 // TODO: 
 //  - 
-
 (function(w) {
-
-	DETECT = DETECT || {};
-	DETECT.plugins = DETECT.plugins || {};
-
-	var init = {};
-
-	DETECT.plugins.DeviceAPI = {
-		
-	}
-
-}(window));
+    DETECT = DETECT || {};
+    DETECT.plugins = DETECT.plugins || {};
+    var init = {};
+    DETECT.plugins.DeviceAPI = {};
+})(window);

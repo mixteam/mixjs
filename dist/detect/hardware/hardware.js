@@ -1,1 +1,1 @@
-(function(e){DETECT=DETECT||{},DETECT.plugins=DETECT.plugins||{};var t={};DETECT.plugins.Hardware={}})(window);
+(function(){DETECT=DETECT||{},DETECT.plugins=DETECT.plugins||{},DETECT.plugins.Hardware={}})(window);
