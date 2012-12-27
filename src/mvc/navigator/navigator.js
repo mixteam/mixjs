@@ -7,7 +7,7 @@ var Class = require('class'),
 
 	win = window,
 	doc = win.document,
-	head = win.head,
+	head = doc.head,
 	undef = undefined,
 	scriptCache = {}
 	;

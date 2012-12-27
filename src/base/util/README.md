@@ -6,7 +6,7 @@
 
 使用方法：
 
-		var Util = require('util'),
+		var util = require('util').singleton,
 			;
 
-			consolo.log(Util.uniqueId());
+			consolo.log(util.uniqueId());

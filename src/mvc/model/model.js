@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 require('reset');
 
 var Class = require('class'),
-    util = require('util')
+    util = require('util').singleton
     ;
 
 /**

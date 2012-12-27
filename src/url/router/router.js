@@ -8,10 +8,11 @@ require('reset');
 
 var Class = require('class'),
 	history = require('history').singleton,
-	namedParam    = /\:\w+/g,
-	splatParam    = /\*\w+/g,
+	namedParam    = /\:(\w\w*)/g,
+	splatParam    = /\*(\w\w*)/g,
+	perlParam = /P\<(\w\w*?)\>/g,
 	escapeRegExp  = /[-[\]{}()+?.,\\^$|#\s]/g,
-	appRegExp = /^[^#\/\!]*/
+	appRegExp = /^[^#\/\!]*/,
 
 	win = window,
 	doc = win.document,
@@ -39,17 +40,19 @@ var Class = require('class'),
 
 		_routeToRegExp : function(route) {
 			route = route.replace(namedParam, '([^\/][^\/]*?)')
-				.replace(splatParam, '(.*?)');
+				.replace(splatParam, '(.*?)')
+				.replace(perlParam, '');
 			return new RegExp('^' + route + '(!.*?)?$');
 		},
 
 		_extractParamKeys : function(route) {
-			var matched = route.match(namedParam),
+			var matched = route.replace(namedParam, '(P<$1>[^\/][^\/]*?)')
+							.replace(splatParam, '(P<$1>.*?)').match(perlParam),
 				keys = {}
 				;
 
 			matched && Object.each(matched, function(key, i) {
-				keys[key.substring(1)] = i;
+				keys[key.replace(perlParam, '$1')] = i;
 			});
 
 			return keys;

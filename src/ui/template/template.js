@@ -242,20 +242,19 @@ var Template = Class.create({
 		split = (typeof path === 'string' ? path.split(/[.\/]/g) : path);
 
 		if (split.length) {
-			chunkName = split.shift();
+			chunkName = split[0];
 			chunk = that._chunks[chunkName];
 
 			if (chunk) {	// 更新的是某个chunk
 				that._partials[chunkName] = 
-					chunk.update(split, chunkData);
+					chunk.update(split.slice(1), chunkData);
 
 				that._html = that._template2({}, {
 					partials : that._partials
 				});
 			} else {	// 更新的是某个chunk中的部分数据
-				data = that._data[chunkName];
+				data = that._data;
 				last = split.pop();
-
 				Object.each(split, function(key) {
 					data = data[key];
 				});
