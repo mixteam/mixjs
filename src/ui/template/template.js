@@ -77,7 +77,7 @@ var Template = Class.create({
 
 		if (arguments.length === 1) {
 			Object.each(arguments[0], function(partial, name) {
-				that.addHelper(name, partial);
+				that.addPartial(name, partial);
 			});
 			return;
 		}

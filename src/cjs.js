@@ -10,16 +10,31 @@
 
 	var	NS_SEP = '/',
 		ID_REG_PREFIX = /^#/,
-		ID_REG_POSTFIX = /\-debug$/i
-		mix = win['modules'] || (win['modules'] = {}),
-		scope = mix,
-		defining = mix.__defining,
-		cjs = win,
-		head = win.head || doc.head
+		ID_REG_POSTFIX = /\.js$/i,
+		modules = win['modules'] || (win['modules'] = {}),
+		scope = modules,
+		cjs = win, seajs,
+		head = win.head || doc.head,
+		basePath = '', 
+		aliasReg = [], 
+		aliasRep = [],
+		resolvedId = {};
 		;
 
-	function parseId(id) {
-		return id.replace(ID_REG_PREFIX, '').replace(ID_REG_POSTFIX, '');
+	function parseId(id, useAlias) {
+		if (resolvedId[id]) {
+			return resolvedId[id];
+		}
+
+		var _id = id.replace(ID_REG_PREFIX, '').replace(ID_REG_POSTFIX, '');
+
+		if (useAlias) {
+			aliasReg.forEach(function(reg, i) {
+				_id = _id.replace(reg, aliasRep[i]);
+			});
+		}
+
+		return (resolvedId[id] = _id);
 	}
 
 	function defineNS(ns, name) {
@@ -31,7 +46,7 @@
 	}
 
 	function buildRequire(moduleId, dependencies) {
-		var innerScope = {},
+		var //innerScope = {},
 			moduleIdPath = moduleId.split(NS_SEP)
 			;
 
@@ -41,7 +56,7 @@
 			var depsIdPath, resolvedPath, resolvedDepsId, path
 				;
 
-			depsId = parseId(depsId);
+			depsId = parseId(depsId, true);
 
 			if (depsId.indexOf('.') === 0) {
 				depsIdPath = depsId.split(NS_SEP);
@@ -58,13 +73,17 @@
 				resolvedDepsId = resolvedPath.join(NS_SEP);
 			}
 
-			if (!(innerScope[depsId] = findNS(scope, resolvedDepsId || depsId))) {
-				throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
+			if (resolvedDepsId && depsId !== resolvedDepsId) {
+				resolvedId[depsId] = resolvedDepsId;
 			}
+
+			// if (!(innerScope[depsId] = findNS(scope, resolvedDepsId || depsId))) {
+			// 	throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
+			// }
 		});
 
 		return function(id) {
-			return require(id, innerScope);
+			return require(id);
 		}
 	}
 
@@ -104,10 +123,10 @@
 		}
 	} 
 
-	function require(moduleId, innerScope) {
-		moduleId = parseId(moduleId);
+	function require(moduleId) {
+		moduleId = parseId(moduleId, true);
 
-		var module = findNS(innerScope || scope, moduleId)
+		var module = findNS(scope, moduleId)
 			;
 
 		if (module && module.exports) {
@@ -120,27 +139,59 @@
 	function load(url, callback) {
 		var script = doc.createElement('script')
 			;
+
+		if (url.indexOf('http') < 0) {
+			url = basePath + url;
+		}
 		
 		script.type = 'text/javascript';
 		script.async = true;
 		script.onload = script.onreadystatechange  = function() {
 			callback && callback();
 		}
+
+
 		script.src = url;
 		head.appendChild(script);
-	}	
-
-	if (defining) {
-		for (var id in defining) {
-			var def = defining[id]
-				;
-
-			define(id, def.dependencies || [], def.factory);
-		}
-		delete mix.__defining;
 	}
 
 	cjs.define = define;
 	cjs.require = require;
 	cjs.load = load;
+
+	function use(dependencies, callback) {
+
+		var args = [];
+
+		if (typeof dependencies === 'string') {
+			dependencies = [dependencies];
+		}
+
+		dependencies.forEach(function(id) {
+			args.push(require(id, true));
+		});
+
+		callback && callback.apply(win, args);
+	}
+
+	function config(opt) {
+		basePath = opt.basePath;
+
+		if (opt.alias) {
+			for (var name in opt.alias) {
+				var value = opt.alias[name]
+					;
+
+				aliasReg.push(new RegExp('^' + name, 'i'));
+				aliasRep.push(value);
+			}
+		}
+	}
+
+	if (!win['seajs']) {
+		seajs = win['seajs'] = {
+			use : use,
+			config : config
+		};
+	}
 })(window, window.document);

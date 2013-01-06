@@ -1,7 +1,10 @@
 define(function(require, exports, module) {
 
 var undef,
-    toString = Object.prototype.toString
+    win = window,
+    toString = Object.prototype.toString,
+    hasOwnProperty = Object.prototype.hasOwnProperty,
+    slice = Array.prototype.slice
     ;
 //
 // Object
@@ -10,7 +13,7 @@ if (!Object.keys) {
     Object.keys = function (object) {
         var keys = [];
         for (var name in object) {
-            if (Object.prototype.hasOwnProperty.call(object, name)) {
+            if (hasOwnProperty.call(object, name)) {
                 keys.push(name);
             }
         }
@@ -19,18 +22,17 @@ if (!Object.keys) {
 }
 
 if (!Object.each) {
-    Object.each = function(object, callback) {
+    Object.each = function(object, callback, context) {
         if (object == null) return;
+
+        context = context || win;
         
-        if (object instanceof Array || 
-                object.hasOwnProperty('length')) {
-
-            Array.prototype.forEach.call(object, callback);
-
-        } else if (typeof object == 'object') {
+        if (hasOwnProperty.call(object, 'length')) {
+            Array.prototype.forEach.call(object, callback, context);
+        } else if (typeof object === 'object') {
             for (var name in object) {
-                if (object.hasOwnProperty(name)) {
-                    callback(object[name], name, object);
+                if (hasOwnProperty.call(object, name)) {
+                    callback.call(context, object[name], name, object);
                 }
             }
         }
@@ -39,15 +41,12 @@ if (!Object.each) {
 
 if (!Object.clone) {
     Object.clone = function(value, deeply) {
-
-        if (value instanceof Array) {
+        if (Object.isTypeof(value, 'array')) {
             if (deeply) {
-                var arr = [];
 
-                Object.each(value, function(v) {
-                    arr.push(Object.clone(v, deeply));
-                });
-                return arr;
+                return arr.map(function(v) {
+                    return Object.clone(v, deeply);
+                })
             } else {
                 return value.slice();
             }
@@ -62,13 +61,17 @@ if (!Object.clone) {
 if (!Object.extend) {
     Object.extend = function(src, target, deeply) {
         var args = Array.make(arguments),
-            src = args.shift()
+            src = args.shift(),
+            deeply = args.pop()
             ;
 
-        deeply = (typeof args[args.length - 1] == 'boolean' ? args.pop() : undef);
+        if (!Object.isTypeof(deeply, 'boolean')) {
+            args.push(deeply);
+            deeply = undef;
+        }
 
-        Object.each(args, function(t) {
-            Object.each(t, function(value, name) {
+        Object.each(args, function(target) {
+            Object.each(target, function(value, name) {
                 src[name] = Object.clone(value, deeply);
             });
         });
@@ -78,18 +81,19 @@ if (!Object.extend) {
 }
 
 if (!Object.isTypeof) {
-    var TYPE_REGEXP = /^\[object\s\s*(\w\w*)\s*\]$/i
+    var TYPE_REGEXP = /^\[object\s\s*(\w\w*)\s*\]$/
     Object.isTypeof = function(obj, istype) {
         var str = toString.call(obj).toLowerCase(),
-            type = TYPE_REGEXP.exec(str)
+            matched = TYPE_REGEXP.exec(str),
+            type
             ;
 
-        if (!type) return;
+        if (!matched) return;
 
         if (istype) {
-            return type[1].toLowerCase() === istype.toLowerCase();
+            return type === istype.toLowerCase();
         } else {
-            return type[1].toLowerCase();
+            return type;
         }
     };
 }
@@ -97,22 +101,20 @@ if (!Object.isTypeof) {
 //
 // Array
 //
-if (!Array.make) {
-    Array.make = function(object) {
-        if (object.hasOwnProperty('length')) {
-            return Array.prototype.slice.call(object);
+if (!Array.make && !Array.from) {
+    Array.from = Array.make = function(object) {
+        if (hasOwnProperty.call(object, 'length')) {
+            return slice.call(object);
         }
     }
 }
 
-if (!Array.eq) {
-    Array.eq = function(a1, a2) {
+if (!Array.equal) {
+    Array.equal = function(a1, a2) {
         if (a1.length == a2.length) {
-            a1.forEach(function(e, i) {
-                if (e !== a2[i]) {
-                    return false;
-                }
-            });
+            for (var i = 0; i < a1.length; i++) {
+                if (a1[i] !== a2[i]) return false;
+            }
             return true;
         } else {
             return false;
@@ -121,86 +123,69 @@ if (!Array.eq) {
 }
 
 if (!Array.prototype.forEach) {
-    Array.prototype.forEach =  function(block, thisObject) {
-        var len = this.length >>> 0;
+    Array.prototype.forEach = function(callback, context) {
+        var arr = this,
+            len = arr.length;
+
         for (var i = 0; i < len; i++) {
-            if (i in this) {
-                block.call(thisObject, this[i], i, this);
+            if (i in arr) {
+                callback.call(context || win, arr[i], i, arr);
             }
         }
     };
 }
 
 if (!Array.prototype.map) {
-    Array.prototype.map = function(fun /*, thisp*/) {
-        var len = this.length >>> 0;
-        var res = new Array(len);
-        var thisp = arguments[1];
+    Array.prototype.map = function(callback, context) {
+        var arr = this,
+            len = arr.length,
+            newArr = new Array(len)
+            ;
 
         for (var i = 0; i < len; i++) {
-            if (i in this) {
-                res[i] = fun.call(thisp, this[i], i, this);
+            if (i in arr) {
+                newArr[i] = callback.call(context || win, arr[i], i, arr);
             }
         }
-        return res;
+        return newArr;
     };
 }
 
 if (!Array.prototype.filter) {
-    Array.prototype.filter = function (block /*, thisp */) {
-        var values = [];
-        var thisp = arguments[1];
-        for (var i = 0; i < this.length; i++) {
-            if (block.call(thisp, this[i])) {
-                values.push(this[i]);
+    Array.prototype.filter = function (callback, context) {
+        var arr = this,
+            len = arr.length,
+            newArr = [],
+            value
+            ;
+
+        for (var i = 0; i < len; i++) {
+            value = arr[i];
+            if (callback.call(context || win, value, i, arr)) {
+                newArr.push(value);
             }
         }
-        return values;
-    };
-}
-
-if (!Array.prototype.reduce) {
-    Array.prototype.reduce = function(fun /*, initial*/) {
-        var len = this.length >>> 0;
-        var i = 0;
-
-        // no value to return if no initial value and an empty array
-        if (len === 0 && arguments.length === 1) throw new TypeError();
-
-        if (arguments.length >= 2) {
-            var rv = arguments[1];
-        } else {
-            do {
-                if (i in this) {
-                    rv = this[i++];
-                    break;
-                }
-                // if array contains no values, no initial value to return
-                if (++i >= len) throw new TypeError();
-            } while (true);
-        }
-        for (; i < len; i++) {
-            if (i in this) {
-                rv = fun.call(null, rv, this[i], i, this);
-            }
-        }
-        return rv;
+        return newArr;
     };
 }
 
 if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (value /*, fromIndex */ ) {
-        var length = this.length;
-        var i = arguments[1] || 0;
+    Array.prototype.indexOf = function (value, fromIndex) {
+        var arr = this,
+            len = arr.length,
+            i = fromIndex || 0
+            ;
 
-        if (!length)     return -1;
-        if (i >= length) return -1;
-        if (i < 0)       i += length;
+        if (!len || i >= len ) return -1;
+
+        if (i < 0) i += len;
 
         for (; i < length; i++) {
-            if (!Object.prototype.hasOwnProperty.call(this, i)) { continue }
-            if (value === this[i]) return i;
+            if (hasOwnProperty.call(arr, i)) {
+                if (value === arr[i]) return i;
+            }
         }
+
         return -1;
     };
 }
@@ -209,8 +194,12 @@ if (!Array.prototype.indexOf) {
 // String
 //
 if (!String.prototype.trim) {
+    var LEFT_TRIM = /^\s\s*/,
+        RIGHT_TRIM = /\s\s*$/
+        ;
+        
     String.prototype.trim = function () {
-        return String(this).replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+        return this.replace(LEFT_TRIM, '').replace(RIGHT_TRIM, '');
     };
 }
 
@@ -218,8 +207,8 @@ if (!String.prototype.trim) {
 // Function
 //
 if (!Function.binded) {
-    var ctor = function(){},
-        slice = Array.prototype.slice;
+    var ctor = function(){}
+        ;
 
     Function.binded = function(func, context) {
         var protoBind = Function.prototype.bind,
