@@ -82,8 +82,8 @@ if (!Object.extend) {
 
 if (!Object.isTypeof) {
     var TYPE_REGEXP = /^\[object\s\s*(\w\w*)\s*\]$/
-    Object.isTypeof = function(obj, istype) {
-        var str = toString.call(obj).toLowerCase(),
+    Object.isTypeof = function(value, istype) {
+        var str = toString.call(value).toLowerCase(),
             matched = TYPE_REGEXP.exec(str),
             type
             ;
