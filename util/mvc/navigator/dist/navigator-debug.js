@@ -1,4 +1,4 @@
-define("mix/core/util/mvc/navigator/0.1.0/navigator-debug", ["mix/core/base/reset/1.0.0/reset-debug", "mix/core/base/class/1.0.0/class-debug", "mix/core/util/mvc/controller/0.1.0/controller-debug"], function(require, exports, module) {
+define("mix/core/util/mvc/navigator/0.1.0/navigator-debug", ["mix/core/base/reset/1.0.0/reset-debug", "mix/core/base/class/1.0.0/class-debug", "mix/core/util/mvc/controller/0.1.0/controller-debug", "mix/core/base/message/1.0.0/message-debug", "mix/core/util/history/0.2.0/history-debug", "mix/core/util/router/0.2.0/router-debug"], function(require, exports, module) {
 
 require('mix/core/base/reset/1.0.0/reset-debug');
 

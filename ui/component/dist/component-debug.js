@@ -1,4 +1,4 @@
-define("mix/core/ui/component/0.2.0/component-debug", ["mix/core/base/reset/1.0.0/reset-debug", "mix/core/base/class/1.0.0/class-debug", "mix/core/base/message/1.0.0/message-debug", "mix/core/ui/template/0.2.0/template-debug", "mix/core/ui/module/0.1.0/module-debug", "mix/core/util/dom/selector/1.0.0/selector-debug"], function(require, exports, module) {
+define("mix/core/ui/component/0.2.0/component-debug", ["mix/core/base/reset/1.0.0/reset-debug", "mix/core/base/class/1.0.0/class-debug", "mix/core/base/message/1.0.0/message-debug", "mix/core/ui/template/0.2.0/template-debug", "mix/libs/handlebars/1.0.5/handlebars-debug", "mix/core/ui/module/0.1.0/module-debug", "mix/core/util/dom/selector/1.0.0/selector-debug", "mix/core/util/dom/event/1.0.0/event-debug"], function(require, exports, module) {
 
 require('mix/core/base/reset/1.0.0/reset-debug');
 
