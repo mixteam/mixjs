@@ -93,6 +93,8 @@ var Selector = require('mix/core/util/dom/selector/1.0.0/selector-debug')
     }
 
     testEl = null
+	
+	module.exports = $
 })(Selector)
 
 //normal animation
@@ -163,6 +165,8 @@ var Selector = require('mix/core/util/dom/selector/1.0.0/selector-debug')
     $.extend($.fn, {
         speeds: speeds
     })
+	
+	module.exports = $
 
 })(Selector)
 

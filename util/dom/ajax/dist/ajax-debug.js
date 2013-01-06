@@ -314,6 +314,8 @@ var Selector = require('mix/core/util/dom/selector/1.0.0/selector-debug')
         serialize(params, obj, traditional)
         return params.join('&').replace('%20', '+')
     }
+	
+	module.exports = $
 })(Selector)
 
 });

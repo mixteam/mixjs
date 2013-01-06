@@ -225,6 +225,8 @@ var Selector = require('mix/core/util/dom/selector/1.0.0/selector-debug')
         event.initEvent(type, bubbles, true, null, null, null, null, null, null, null, null, null, null, null, null)
         return event
     }
+	
+	module.exports = $
 
 })(Selector)
 
