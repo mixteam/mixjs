@@ -1,6 +1,6 @@
-define("#mix/core/0.3.0/mvc/orm/orm-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug", "mix/core/0.3.0/mvc/model/model-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), Model = require("mix/core/0.3.0/mvc/model/model-debug");
+define("#mix/core/0.3.0/mvc/orm/orm-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/mvc/model-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), Model = require("mix/core/0.3.0/mvc/model-debug");
     ORM = Model.extend({
         test: function() {
             console.log(this.init());

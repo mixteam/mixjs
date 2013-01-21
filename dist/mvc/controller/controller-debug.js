@@ -2,9 +2,9 @@
 // Thanks to:
 //	-http://backbonejs.org
 //	-http://underscorejs.org
-define("#mix/core/0.3.0/mvc/controller/controller-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug", "mix/core/0.3.0/base/message/message-debug", "mix/core/0.3.0/url/history/history-debug", "mix/core/0.3.0/url/router/router-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), Message = require("mix/core/0.3.0/base/message/message-debug"), history = require("mix/core/0.3.0/url/history/history-debug").singleton, router = require("mix/core/0.3.0/url/router/router-debug").singleton, undef = undefined, spliterReg = Message.spliterReg, atReg = Message.atReg;
+define("#mix/core/0.3.0/mvc/controller/controller-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "history-debug", "mix/core/0.3.0/url/router-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), history = require("history-debug").singleton, router = require("mix/core/0.3.0/url/router-debug").singleton, undef = undefined, spliterReg = Message.spliterReg, atReg = Message.atReg;
     var Controller = Class.create({
         Implements: Message,
         initialize: function(name, options) {

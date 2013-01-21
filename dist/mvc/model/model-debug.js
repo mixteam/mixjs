@@ -2,9 +2,9 @@
 // Thanks to:
 //	-http://backbonejs.org
 //	-http://underscorejs.org
-define("#mix/core/0.3.0/mvc/model/model-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug", "mix/core/0.3.0/base/util/util-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), util = require("mix/core/0.3.0/base/util/util-debug").singleton;
+define("#mix/core/0.3.0/mvc/model/model-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/util-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), util = require("mix/core/0.3.0/base/util-debug").singleton;
     /**
  * @class Model
  */

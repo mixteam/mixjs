@@ -1,6 +1,6 @@
-define("#mix/core/0.3.0/ui/template/template-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug", "mix/libs/handlebars/1.0.5/handlebars-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), Handlebars = require("mix/libs/handlebars/1.0.5/handlebars-debug"), undef = undefined, win = window, doc = win.document;
+define("#mix/core/0.3.0/ui/template/template-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/libs/handlebars/1.0.5/handlebars-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), Handlebars = require("mix/libs/handlebars/1.0.5/handlebars-debug"), undef = undefined, win = window, doc = win.document;
     /**
  * @class Template
  */
@@ -56,7 +56,7 @@ define("#mix/core/0.3.0/ui/template/template-debug", [ "mix/core/0.3.0/base/rese
             var that = this;
             if (arguments.length === 1) {
                 Object.each(arguments[0], function(partial, name) {
-                    that.addHelper(name, partial);
+                    that.addPartial(name, partial);
                 });
                 return;
             }

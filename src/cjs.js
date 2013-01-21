@@ -1,9 +1,8 @@
 /**
-* @fileOverview get fnn with CommonJS!
-* @author zhuxun
+* @fileOverview get fun with CommonJS!
+* @author zhuxun.jb@taobao.com
 */
 
-/**@type {Function} norjs/define function in global scope*/
 (function(win, doc, undef) {
 	if (win['define']) return;
 

@@ -1,6 +1,6 @@
-define("#mix/core/0.3.0/mvc/navigator/navigator-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug", "mix/core/0.3.0/mvc/controller/controller-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), Controller = require("mix/core/0.3.0/mvc/controller/controller-debug"), win = window, doc = win.document, head = doc.head, undef = undefined, scriptCache = {};
+define("#mix/core/0.3.0/mvc/navigator/navigator-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/mvc/controller-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), Controller = require("mix/core/0.3.0/mvc/controller-debug"), win = window, doc = win.document, head = doc.head, undef = undefined, scriptCache = {};
     var Navigator = Controller.extend({
         initialize: function() {
             var that = this, options = {

@@ -1,8 +1,8 @@
 //     Zepto.js
 //     (c) 2010-2012 Thomas Fuchs
 //     Zepto.js may be freely distributed under the MIT license.
-define("#mix/core/0.3.0/dom/event/event-debug", [ "mix/core/0.3.0/dom/selector/selector-debug" ], function(require, exports, module) {
-    var Selector = require("mix/core/0.3.0/dom/selector/selector-debug");
+define("#mix/core/0.3.0/dom/event/event-debug", [ "mix/core/0.3.0/dom/selector-debug" ], function(require, exports, module) {
+    var Selector = require("mix/core/0.3.0/dom/selector-debug");
     (function($) {
         var $$ = $.zepto.qsa, handlers = {}, _zid = 1, specialEvents = {};
         specialEvents.click = specialEvents.mousedown = specialEvents.mouseup = specialEvents.mousemove = "MouseEvents";

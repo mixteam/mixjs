@@ -1,1 +1,0 @@
-define("#mix/core/0.3.0/base/util/util",["mix/core/0.3.0/base/class/class"],function(a,b,c){var d=a("mix/core/0.3.0/base/class/class"),e={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#x27;","/":"&#x2F;"},f=/[&<>"'\/]/g,g=d.create({initialize:function(){},escape:function(a){return(""+a).replace(f,function(a){return e[a]})}});g.singleton=new g,c.exports=g});

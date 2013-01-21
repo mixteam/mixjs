@@ -1,7 +1,7 @@
-define("#mix/core/0.3.0/ui/module/module-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug", "mix/core/0.3.0/base/message/message-debug", "mix/core/0.3.0/dom/selector/selector-debug", "mix/core/0.3.0/dom/event/event-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), Message = require("mix/core/0.3.0/base/message/message-debug"), $ = require("mix/core/0.3.0/dom/selector/selector-debug");
-    require("mix/core/0.3.0/dom/event/event-debug");
+define("#mix/core/0.3.0/ui/module/module-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/dom/selector-debug", "mix/core/0.3.0/dom/event-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), $ = require("mix/core/0.3.0/dom/selector-debug");
+    require("mix/core/0.3.0/dom/event-debug");
     var win = window, doc = win.document, undef = undefined, OPTIONS = {
         debug: true
     }, DEPOS = {};

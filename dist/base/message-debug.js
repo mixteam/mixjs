@@ -1,20 +1,26 @@
 // Thanks to:
 //  - https://github.com/documentcloud/backbone/blob/master/backbone.js
 //  - https://github.com/joyent/node/blob/master/lib/events.js
-define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/reset/reset-debug", "mix/core/0.3.0/base/class/class-debug" ], function(require, exports, module) {
-    require("mix/core/0.3.0/base/reset/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class/class-debug"), eventSplitter = /\s+/, // Regular expression used to split event strings
-    atMessage = /^\@([^:]+)/, // Regular expression used to @message
-    msgId = 0;
-    // A module that can be mixed in to *any object* in order to provide it
-    // with custom message. You may bind with `on` or remove with `off` callback
-    // functions to an event; `trigger`-ing an event fires all callbacks in
-    // succession.
-    //
-    //     var object = new Message();
-    //     object.on('expand', function(){ alert('expanded'); });
-    //     object.trigger('expand');
-    //
+define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), SPLITER_REG = /\s+/, // Regular expression used to split event strings
+    AT_REG = /^\@([^:]+)\:/, // Regular expression used to @message
+    AT_SPLITER = ":", msgId = 0;
+    function getEventList(cache, event) {
+        var list, matches, at;
+        if ((matches = event.match(AT_REG)) && matches[1] === "*") {
+            list = [];
+            at = new RegExp("^(@[^\\:]+\\:)?" + event + "$");
+            Object.each(cache, function(eventList, eventName) {
+                if (at.test(eventName)) {
+                    list = list.concat(eventList);
+                }
+            });
+        } else {
+            list = cache[event];
+        }
+        return list;
+    }
     var Message = Class.create({
         initialize: function(name, id, defaultContext) {
             var that = this;
@@ -28,12 +34,16 @@ define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/rese
         // Bind one or more space separated events, `events`, to a `callback`
         // function. Passing `"all"` will bind the callback to all events fired.
         on: function(events, callback, context) {
-            var that = this, cache = that.__msgObj.cache, event, list;
+            var that = this, cache = that.__msgObj.cache, defaultContext = that.__msgObj.defaultContext, matches = "", event, list;
             if (!callback) return that;
-            events = events.split(eventSplitter);
+            if (matches = event.match(AT_REG)) {
+                events = events.split(AT_SPLITER)[1];
+            }
+            events = events.split(SPLITER_REG);
             while (event = events.shift()) {
+                event = matches[0] + event;
                 list = cache[event] || (cache[event] = []);
-                list.push(callback, context);
+                list.push(callback, context || defaultContext);
             }
             return that;
         },
@@ -41,15 +51,20 @@ define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/rese
         // with that function. If `callback` is null, removes all callbacks for the
         // event. If `events` is null, removes all bound callbacks for all events.
         off: function(events, callback, context) {
-            var that = this, cache = that.__msgObj.cache, event, list, i, len;
+            var that = this, cache = that.__msgObj.cache, matches = "", event, list, i, len;
             // No events, or removing *all* events.
             if (!(events || callback || context)) {
                 delete that.__msgObj.events;
                 return that;
             }
-            events = events ? events.split(eventSplitter) : Object.keys(cache);
+            if (events && matches = event.match(AT_REG)) {
+                events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
+            } else {
+                events = Object.keys(cache);
+            }
             // Loop through the callback list, splicing where appropriate.
             while (event = events.shift()) {
+                event = matches[0] + events;
                 list = cache[event];
                 if (!list) continue;
                 if (!(callback || context)) {
@@ -64,23 +79,8 @@ define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/rese
             }
             return that;
         },
-        __getCaches: function(event) {
-            var that = this, cache = that.__msgObj.cache, list, atEvent;
-            if (atMessage.test(event)) {
-                list = cache[event];
-            } else {
-                list = [];
-                atEvent = new RegExp("^@[^\\:]+\\:" + event + "$");
-                Object.each(cache, function(eventList, eventName) {
-                    if (event === eventName || atEvent.test(eventName)) {
-                        list = list.concat(eventList);
-                    }
-                });
-            }
-            return list;
-        },
         has: function(event, callback, context) {
-            var that = this, cache = that.__msgObj.cache, list = that.__getCaches(event), i;
+            var that = this, cache = that.__msgObj.cache, list = getEventList(cache, event), i;
             if (!list) return false;
             if (!(callback || context)) return true;
             for (i = list.length - 2; i >= 0; i -= 2) {
@@ -104,7 +104,7 @@ define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/rese
         // receive the true name of the event as the first argument).
         trigger: function(events) {
             var that = this, cache = that.__msgObj.cache, defaultContext = that.__msgObj.defaultContext, event, all, list, i, len, rest = [], args;
-            events = events.split(eventSplitter);
+            events = events.split(SPLITER_REG);
             // Using loop is more efficient than `slice.call(arguments, 1)`
             for (i = 1, len = arguments.length; i < len; i++) {
                 rest[i - 1] = arguments[i];
@@ -115,7 +115,7 @@ define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/rese
                 that.log(event + ":(" + rest.join(",") + ")");
                 // Copy callback lists to prevent modification.
                 if (all = cache.all) all = all.slice();
-                if (list = that.__getCaches(event)) list = list.slice();
+                if (list = getEventList(cache, event)) list = list.slice();
                 // Execute event callbacks.
                 if (list) {
                     for (i = 0, len = list.length; i < len; i += 2) {
@@ -138,13 +138,8 @@ define("#mix/core/0.3.0/base/message/message-debug", [ "mix/core/0.3.0/base/rese
         }
     });
     // Mix `Message` to object instance or Class function.
-    Message.mixTo = function(receiver) {
-        receiver = receiver.prototype || receiver;
-        var proto = Events.prototype;
-        Object.extend(receiver, proto);
-    };
-    Message.spliterReg = eventSplitter;
-    Message.atReg = atMessage;
+    Message.SPLITER_REG = SPLITER_REG;
+    Message.AT_REG = AT_REG;
     Message.singleton = new Message("global");
     module.exports = Message;
 });

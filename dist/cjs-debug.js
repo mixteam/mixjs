@@ -5,11 +5,18 @@
 /**@type {Function} norjs/define function in global scope*/
 (function(win, doc, undef) {
     if (win["define"]) return;
-    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\-debug$/i;
-    mix = win["modules"] || (win["modules"] = {}), scope = mix, defining = mix.__defining, 
-    cjs = win, head = win.head || doc.head;
-    function parseId(id) {
-        return id.replace(ID_REG_PREFIX, "").replace(ID_REG_POSTFIX, "");
+    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, modules = win["modules"] || (win["modules"] = {}), scope = modules, cjs = win, seajs, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
+    function parseId(id, useAlias) {
+        if (resolvedId[id]) {
+            return resolvedId[id];
+        }
+        var _id = id.replace(ID_REG_PREFIX, "").replace(ID_REG_POSTFIX, "");
+        if (useAlias) {
+            aliasReg.forEach(function(reg, i) {
+                _id = _id.replace(reg, aliasRep[i]);
+            });
+        }
+        return resolvedId[id] = _id;
     }
     function defineNS(ns, name) {
         return ns[name] || (ns[name] = {});
@@ -18,11 +25,12 @@
         return ns[name];
     }
     function buildRequire(moduleId, dependencies) {
-        var innerScope = {}, moduleIdPath = moduleId.split(NS_SEP);
+        var //innerScope = {},
+        moduleIdPath = moduleId.split(NS_SEP);
         moduleIdPath.pop();
         dependencies.forEach(function(depsId) {
             var depsIdPath, resolvedPath, resolvedDepsId, path;
-            depsId = parseId(depsId);
+            depsId = parseId(depsId, true);
             if (depsId.indexOf(".") === 0) {
                 depsIdPath = depsId.split(NS_SEP);
                 resolvedPath = moduleIdPath.slice();
@@ -35,12 +43,12 @@
                 }
                 resolvedDepsId = resolvedPath.join(NS_SEP);
             }
-            if (!(innerScope[depsId] = findNS(scope, resolvedDepsId || depsId))) {
-                throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
+            if (resolvedDepsId && depsId !== resolvedDepsId) {
+                resolvedId[depsId] = resolvedDepsId;
             }
         });
         return function(id) {
-            return require(id, innerScope);
+            return require(id);
         };
     }
     function define(moduleId, dependencies, factory) {
@@ -70,9 +78,9 @@
             module.exports = factory;
         }
     }
-    function require(moduleId, innerScope) {
-        moduleId = parseId(moduleId);
-        var module = findNS(innerScope || scope, moduleId);
+    function require(moduleId) {
+        moduleId = parseId(moduleId, true);
+        var module = findNS(scope, moduleId);
         if (module && module.exports) {
             return module.executed ? module.exports : module.exports();
         } else {
@@ -81,6 +89,9 @@
     }
     function load(url, callback) {
         var script = doc.createElement("script");
+        if (url.indexOf("http") < 0) {
+            url = basePath + url;
+        }
         script.type = "text/javascript";
         script.async = true;
         script.onload = script.onreadystatechange = function() {
@@ -89,14 +100,33 @@
         script.src = url;
         head.appendChild(script);
     }
-    if (defining) {
-        for (var id in defining) {
-            var def = defining[id];
-            define(id, def.dependencies || [], def.factory);
-        }
-        delete mix.__defining;
-    }
     cjs.define = define;
     cjs.require = require;
     cjs.load = load;
+    function use(dependencies, callback) {
+        var args = [];
+        if (typeof dependencies === "string") {
+            dependencies = [ dependencies ];
+        }
+        dependencies.forEach(function(id) {
+            args.push(require(id, true));
+        });
+        callback && callback.apply(win, args);
+    }
+    function config(opt) {
+        basePath = opt.basePath;
+        if (opt.alias) {
+            for (var name in opt.alias) {
+                var value = opt.alias[name];
+                aliasReg.push(new RegExp("^" + name, "i"));
+                aliasRep.push(value);
+            }
+        }
+    }
+    if (!win["seajs"]) {
+        seajs = win["seajs"] = {
+            use: use,
+            config: config
+        };
+    }
 })(window, window.document);

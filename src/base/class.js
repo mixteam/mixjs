@@ -18,13 +18,13 @@ define(function(require, exports, module) {
 
 function Class(o) {
   // Convert existed function to Class.
-  if (!(this instanceof Class) && isFunction(o)) {
+  if (!(this instanceof Class) && Object.isTypeof(o, 'function')) {
     return classify(o);
   }
 }
 
 Class.create = function(parent, properties) {
-  if (!isFunction(parent)) {
+  if (!Object.isTypeof(parent, 'function')) {
     properties = parent;
     parent = null;
   }
@@ -46,7 +46,7 @@ Class.create = function(parent, properties) {
 
   // Inherit class (static) properties from parent.
   if (parent !== Class) {
-    mix(Klass, parent);
+    Object.extend(Klass, parent);
   }
 
   // Add instance properties to the klass.
@@ -71,7 +71,7 @@ Class.Mutators = {
     var proto = createProto(parent.prototype);
 
     // Keep existed properties.
-    mix(proto, existed);
+    Object.extend(proto, existed);
 
     // Enforce the constructor to be what we expect.
     proto.constructor = this;
@@ -85,16 +85,16 @@ Class.Mutators = {
   },
 
   'Implements': function(items) {
-    isArray(items) || (items = [items]);
+    Object.isTypeof(items, 'array') || (items = [items]);
     var proto = this.prototype, item;
 
     while (item = items.shift()) {
-      mix(proto, item.prototype || item);
+      Object.extend(proto, item.prototype || item);
     }
   },
 
   'Statics': function(staticProperties) {
-      mix(this, staticProperties);
+      Object.extend(this, staticProperties);
   }
 };
 
@@ -102,14 +102,17 @@ Class.Mutators = {
 function Ctor() {}
 
 // See: http://jsperf.com/object-create-vs-new-ctor
-var createProto = Object.__proto__ ?
-        function(proto) {
-            return { __proto__: proto };
-        } :
-        function(proto) {
-            Ctor.prototype = proto;
-            return new Ctor();
-        };
+if (Object.__proto__) {
+  function createProto(proto) {
+      return { __proto__: proto };
+  }
+} else {
+  function Ctor() {}
+  function createProto(proto) {
+      Ctor.prototype = proto;
+      return new Ctor();
+  }
+}
 
 function implement(properties) {
   var key, value;
@@ -131,31 +134,5 @@ function classify(cls) {
   return cls;
 }
 
-var mix = Class.mix = function(r, s) {
-  // Copy "all" properties including inherited ones.
-  for (var p in s) {
-    if (s.hasOwnProperty(p)) {
-      // 在 iPhone 1 代等设备的 Safari 中，prototype 也会被枚举出来，需排除
-      if (p !== 'prototype') {
-        r[p] = s[p];
-      }
-    }
-  }
-}
-
-var toString = Object.prototype.toString;
-var isArray = Array.isArray;
-
-if (!isArray) {
-  isArray = function(val) {
-    return toString.call(val) === '[object Array]';
-  };
-}
-
-var isFunction = function(val) {
-  return toString.call(val) === '[object Function]';
-};
-
 module.exports = Class;
-
 });

@@ -1,7 +1,6 @@
 define(function(require, exports, module) {
 
 var undef,
-    win = window,
     toString = Object.prototype.toString,
     hasOwnProperty = Object.prototype.hasOwnProperty,
     slice = Array.prototype.slice
@@ -11,10 +10,10 @@ var undef,
 //
 if (!Object.keys) {
     Object.keys = function (object) {
-        var keys = [];
+        var keys = [], i = 0;
         for (var name in object) {
             if (hasOwnProperty.call(object, name)) {
-                keys.push(name);
+                keys[i++] = name;
             }
         }
         return keys;
@@ -24,8 +23,6 @@ if (!Object.keys) {
 if (!Object.each) {
     Object.each = function(object, callback, context) {
         if (object == null) return;
-
-        context = context || win;
         
         if (hasOwnProperty.call(object, 'length')) {
             Array.prototype.forEach.call(object, callback, context);
@@ -129,7 +126,7 @@ if (!Array.prototype.forEach) {
 
         for (var i = 0; i < len; i++) {
             if (i in arr) {
-                callback.call(context || win, arr[i], i, arr);
+                callback.call(context, arr[i], i, arr);
             }
         }
     };
@@ -144,7 +141,7 @@ if (!Array.prototype.map) {
 
         for (var i = 0; i < len; i++) {
             if (i in arr) {
-                newArr[i] = callback.call(context || win, arr[i], i, arr);
+                newArr[i] = callback.call(context, arr[i], i, arr);
             }
         }
         return newArr;
@@ -161,7 +158,7 @@ if (!Array.prototype.filter) {
 
         for (var i = 0; i < len; i++) {
             value = arr[i];
-            if (callback.call(context || win, value, i, arr)) {
+            if (callback.call(context, value, i, arr)) {
                 newArr.push(value);
             }
         }
@@ -202,41 +199,4 @@ if (!String.prototype.trim) {
         return this.replace(LEFT_TRIM, '').replace(RIGHT_TRIM, '');
     };
 }
-
-//
-// Function
-//
-if (!Function.binded) {
-    var ctor = function(){}
-        ;
-
-    Function.binded = function(func, context) {
-        var protoBind = Function.prototype.bind,
-            args = Array.make(arguments),
-            _args, bound
-            ;
-
-        if (func.bind === protoBind && protoBind) 
-            return protoBind.apply(func, slice.call(arguments, 1));
-
-        if (!Object.isTypeof(func, 'function')) throw new TypeError;
-
-        _args = args.slice(2);
-
-        return bound = function() {
-            if (!(this instanceof bound)) 
-                return func.apply(context, _args.concat(args));
-
-            ctor.prototype = func.prototype;
-            var self = new ctor;
-            var result = func.apply(self, _args.concat(args));
-
-            if (Object(result) === result) 
-                return result;
-            
-            return self;
-        };
-    }
-}
-
 });
