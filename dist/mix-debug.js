@@ -459,14 +459,14 @@ define("#mix/core/0.3.0/base/util-debug", [ "mix/core/0.3.0/base/reset-debug", "
 // Thanks to:
 //	-http://backbonejs.org
 //	-http://underscorejs.org
-define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), routeStripper = /^#/, win = window, doc = win.document, loc = win.location, his = win.Router;
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = requite("message"), win = window, doc = win.document, loc = win.location, his = win.Router;
     var Router = Class.create({
         Implements: Message,
         initialize: function() {
             var that = this;
-            Message.prototype.initialize.call(that, "router");
+            Message.prototype.initialize.call(that, "navigate");
             that._handlers = [];
             that._options = {};
             that._changeHanlder = that._changeHanlder.bind(that);
@@ -483,7 +483,7 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
                 handler.matched = false;
             });
         },
-        _changeHanlder: function(events) {
+        _changeHanlder: function() {
             var that = this;
             that._resetHandler();
             that.match();
@@ -491,10 +491,12 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
         start: function(options) {
             var that = this, fragment;
             if (Router.started) return false;
-            win.addEventListener("hashchange", that._changeHanlder, false);
             Router.started = true;
-            Object.extend(that._options, options || {});
-            that.match();
+            win.addEventListener("hashchange", that._changeHanlder, false);
+            options = Object.extend(that._options, options || {});
+            if (options.firstMatch !== false) {
+                that.match();
+            }
             return true;
         },
         stop: function() {
@@ -504,22 +506,24 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
             Router.started = false;
             that._options = {};
             that._handlers = [];
+            that._fragment = null;
             return true;
         },
         match: function() {
-            var that = this, handlers = that._handlers, handler, fragment;
+            var that = this, options = that._;
+            handlers = that._handlers, handler, fragment, unmatched = true;
             if (!Router.started) return;
             fragment = that._fragment = that._getHash();
             for (var i = 0; i < handlers.length; i++) {
                 handler = handlers[i];
                 if (!handler.matched && handler.route.test(fragment)) {
+                    unmatched = true;
                     handler.matched = true;
                     handler.callback(fragment);
-                    if (handler.last) {
-                        return;
-                    }
+                    if (handler.last) break;
                 }
             }
+            unmatched && that.trigger("unmatched", fragment);
         },
         add: function(route, callback, last) {
             var that = this, handlers = that._handlers;
@@ -539,7 +543,7 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
                 }
             }
         },
-        navigate: function(fragment, options) {
+        navigate: function(fragment) {
             var that = this, fragment;
             if (!Router.started) return;
             fragment || (fragment = "");
@@ -559,35 +563,39 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
 //	-http://underscorejs.org
 define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Router = require("mix/core/0.3.0/url/router-debug"), namedRegExp = /\:(\w\w*)/g, splatRegExp = /\*(\w\w*)/g, perlRegExp = /P\<(\w\w*?)\>/g, //escapeRegExp  = /[-[\]{}()+?.,\\^$|#\s]/g,
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = requite("message"), Router = require("mix/core/0.3.0/url/router-debug"), NAMED_REGEXP = /\:(\w\w*)/g, SPLAT_REGEXP = /\*(\w\w*)/g, PERL_REGEXP = /P\<(\w\w*?)\>/g, ARGS_SPLITER = "!", //escapeRegExp  = /[-[\]{}()+?.,\\^$|#\s]/g,
     //routeRegExp = /^([^!]*?)(![^!]*?)?$/,
     win = window, doc = win.document, his = win.history, loc = win.location;
     var Navigate = Class.create({
+        Implements: Message,
         initialize: function(options, globalRouter) {
             var that = this;
+            Message.prototype.initialize.call(that, "navigate");
             that._options = Object.extend({
                 stateLimit: 100
             }, options || {});
             that._states = [];
             that._stateIdx = 0;
             that._move = null;
-            if (globalRouter) {
+            that._datas = null;
+            that._routes = {};
+            if (globalRouter === true) {
                 that._router = Router.singleton;
             } else {
                 that._router = new Router();
             }
         },
-        _convertParameters: function(route) {
-            return route.replace(namedRegExp, "(P<$1>[^/][^/]*?)").replace(splatRegExp, "(P<$1>.*?)");
+        _convertParams: function(routeText) {
+            return routeText.replace(NAMED_REGEXP, "(P<$1>[^\\/]*?)").replace(SPLAT_REGEXP, "(P<$1>.*?)");
         },
-        _extractParamKeys: function(route) {
-            var matched = route.match(perlParam), keys = {};
-            matched && Object.each(matched, function(key, i) {
-                keys[key.replace(perlParam, "$1")] = i;
+        _extractNames: function(routeText) {
+            var matched = routeText.match(perlParam), names = {};
+            matched && Object.each(matched, function(name, i) {
+                names[name.replace(perlParam, "$1")] = i;
             });
-            return keys;
+            return names;
         },
-        _extractArguments: function(args) {
+        _extractArgs: function(args) {
             var split = args.split("&");
             args = {};
             Object.each(split, function(pair) {
@@ -598,101 +606,111 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             });
             return args;
         },
-        _parseRoute: function(route) {
-            route = route.replace(perlParam, "");
-            return new RegExp("^(" + route + ")(![^!]*?)?$");
+        _parseRoute: function(routeText) {
+            routeText = routeText.replace(perlParam, "");
+            return new RegExp("^(" + routeText + ")(" + ARGS_SPLITER + ".*?)?$");
         },
-        _isStateEqual: function(state1, state2) {},
+        _stateEquals: function(state1, state2) {
+            if (!state1 || !state2) return false;
+            if (state1.name !== state2.name || state1.fragment !== state2.fragment) return false;
+            return true;
+        },
         _pushState: function(name, fragment, params, args) {
-            var that = this, options = that._options, stateLimit = options.stateLimit, states = that._states, stateIdx = that._stateIdx, stateLen = states.length, move = that._move, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
+            var that = this, options = that._options, stateLimit = options.stateLimit, states = that._states, stateIdx = that._stateIdx, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
                 name: name,
                 fragment: fragment,
                 params: params,
                 args: args
             };
-            function isEqual(state1, state2) {
-                if (!state1 || !state2) return false;
-                if (state1.fragment !== state2.fragment) return false;
-                return true;
-            }
-            // TODO 当使用浏览器的前进后退时，判断forward和backward会有点小问题
-            that._move = null;
             if (move == null) {
-                if (prev && isEqual(prev, cur)) {
+                if (!datas && that._stateEquals(prev, cur)) {
                     move = "backward";
+                } else {
+                    move = "forward";
+                }
+            }
+            if (move === "backward") {
+                if (stateIdx === 0 && stateLen > 0) {
+                    states.unshift(cur);
+                } else if (stateIdx > 0) {
                     stateIdx--;
                     cur = prev;
-                } else if (!next || next && isEqual(next, cur)) {
-                    move = "forward";
+                }
+            } else if (move === "forward") {
+                if (stateIdx === stateLimit - 1) {
+                    states.shift();
+                    states.push(cur);
+                } else if (stateIdx === 0 && stateLen === 0) {
+                    states.push(cur);
+                } else if (!datas && that._stateEquals(next, cur)) {
                     stateIdx++;
                     cur = next;
-                }
-            } else {
-                if (move === "backward") {
-                    if (stateIdx === 0 && stateLen > 0) {
-                        states.unshift(cur);
-                    } else if (stateIdx > 0) {
-                        stateIdx--;
-                        cur = prev;
-                    }
-                } else if (move === "forward") {
-                    if (stateIdx === stateLimit - 1) {
-                        states.shift();
-                        states.push(cur);
-                    } else if (stateIdx === 0 && stateLen === 0) {
-                        states.push(cur);
-                    } else if (isEqual(next, cur)) {
-                        stateIdx++;
-                        cur = next;
-                    } else {
-                        states.splice(stateIdx++);
-                        states.push(cur);
-                    }
+                } else {
+                    states.splice(stateIdx++);
+                    states.push(cur);
                 }
             }
+            cur.move = move;
+            datas && cur.datas = datas;
+            that._move = null;
+            that._datas = null;
             that._stateIdx = stateIdx;
-            that._router.trigger("navigator:" + move, cur);
+            that.trigger(move, cur);
             return cur;
+        },
+        getRouter: function() {
+            return this._router;
         },
         getState: function() {
             return this._states[this._stateIdx];
         },
-        addRoute: function(name, routeText, callback, last) {
-            var that = this, paramsKeys, routeReg;
-            routeText = that._convertParameters(routeText);
-            paramsKeys = that._extractParamKeys(routeText);
-            routeReg = that._parseRoute(routeText);
-            if (Object.isTypeof(callback) === "boolean") {
-                last = callback;
-                callback = null;
+        addRoute: function(name, routeText, options) {
+            var that = this, callback, name, routeNames, routeReg;
+            if (arguments.length === 1) {
+                options = arguments[0];
+                name = null;
+                routeText = null;
             }
-            if (last == null) {
-                last = true;
-            }
-            that._router.add(routeReg, function(fragment) {
-                var matched = fragment.match(route).slice(2), args = that._extractArguments(matched.pop() || ""), params = {}, state;
-                Object.each(paramsKeys, function(index, key) {
-                    params[key] = matched[index];
+            options || (options = {});
+            if (options["default"]) {
+                that._router.on("unmatched", function(fragment) {
+                    var state = that._pushState(name, fragment);
+                    options.callback && options.callback(state);
                 });
-                state = that._pushState(name, fragment, params, args);
-                callback && callback(state);
-            }, last);
+            } else if (name && routeText) {
+                routeText = that._convertParames(routeText);
+                routeNames = that._extractNames(routeText);
+                routeReg = that._parseRoute(routeText);
+                that._routes[name] = routeReg;
+                that._router.add(routeReg, function(fragment) {
+                    var matched = fragment.match(routeReg).slice(2), args = that._extractArgs(matched.pop() || ""), params = {}, state;
+                    Object.each(routeNames, function(index, key) {
+                        params[key] = matched[index];
+                    });
+                    state = that._pushState(name, fragment, params, args);
+                    options.callback && options.callback(state);
+                }, options.last);
+            }
         },
-        removeRoute: function(route) {
-            var that = this, route = that._routeToRegExp(route);
-            that._router.remove(route);
+        removeRoute: function(name) {
+            var that = this, routeReg = that._routes[name];
+            routeReg && that._router.remove(routeReg);
         },
         forward: function(fragment, options) {
-            var that = this, states = that._states, stateIdx = that._stateIdx, cur = states[stateIdx], args = [];
+            var that = this, states = that._states, stateIdx = that._stateIdx, cur = states[stateIdx] || {}, args = [];
             that._move = "forward";
+            options || (options = {});
             if (fragment) {
-                if (!cur || cur.fragment !== fragment) {
-                    if (options && options.args) {
+                if (options.datas || cur.fragment !== fragment) {
+                    if (options.args) {
                         Object.each(options.args, function(value, key) {
                             args.push(key + "=" + value);
                         });
                     }
-                    that._router.navigate(fragment + (args.length ? "!" + args.join("&") : ""));
+                    if (options.datas) {
+                        that._datas = Object.clone(options.datas);
+                    }
+                    that._router.navigate(fragment + (args.length ? ARGS_SPLITER + args.join("&") : ""));
                 }
             } else {
                 his.forward();

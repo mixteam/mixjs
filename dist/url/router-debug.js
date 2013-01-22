@@ -2,14 +2,14 @@
 // Thanks to:
 //	-http://backbonejs.org
 //	-http://underscorejs.org
-define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
+define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), routeStripper = /^#/, win = window, doc = win.document, loc = win.location, his = win.Router;
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = requite("message"), win = window, doc = win.document, loc = win.location, his = win.Router;
     var Router = Class.create({
         Implements: Message,
         initialize: function() {
             var that = this;
-            Message.prototype.initialize.call(that, "router");
+            Message.prototype.initialize.call(that, "navigate");
             that._handlers = [];
             that._options = {};
             that._changeHanlder = that._changeHanlder.bind(that);
@@ -26,7 +26,7 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
                 handler.matched = false;
             });
         },
-        _changeHanlder: function(events) {
+        _changeHanlder: function() {
             var that = this;
             that._resetHandler();
             that.match();
@@ -34,10 +34,12 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
         start: function(options) {
             var that = this, fragment;
             if (Router.started) return false;
-            win.addEventListener("hashchange", that._changeHanlder, false);
             Router.started = true;
-            Object.extend(that._options, options || {});
-            that.match();
+            win.addEventListener("hashchange", that._changeHanlder, false);
+            options = Object.extend(that._options, options || {});
+            if (options.firstMatch !== false) {
+                that.match();
+            }
             return true;
         },
         stop: function() {
@@ -47,22 +49,24 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
             Router.started = false;
             that._options = {};
             that._handlers = [];
+            that._fragment = null;
             return true;
         },
         match: function() {
-            var that = this, handlers = that._handlers, handler, fragment;
+            var that = this, options = that._;
+            handlers = that._handlers, handler, fragment, unmatched = true;
             if (!Router.started) return;
             fragment = that._fragment = that._getHash();
             for (var i = 0; i < handlers.length; i++) {
                 handler = handlers[i];
                 if (!handler.matched && handler.route.test(fragment)) {
+                    unmatched = true;
                     handler.matched = true;
                     handler.callback(fragment);
-                    if (handler.last) {
-                        return;
-                    }
+                    if (handler.last) break;
                 }
             }
+            unmatched && that.trigger("unmatched", fragment);
         },
         add: function(route, callback, last) {
             var that = this, handlers = that._handlers;
@@ -82,7 +86,7 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
                 }
             }
         },
-        navigate: function(fragment, options) {
+        navigate: function(fragment) {
             var that = this, fragment;
             if (!Router.started) return;
             fragment || (fragment = "");

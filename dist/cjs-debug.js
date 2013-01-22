@@ -1,8 +1,7 @@
 /**
-* @fileOverview get fnn with CommonJS!
-* @author zhuxun
+* @fileOverview get fun with CommonJS!
+* @author zhuxun.jb@taobao.com
 */
-/**@type {Function} norjs/define function in global scope*/
 (function(win, doc, undef) {
     if (win["define"]) return;
     var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, modules = win["modules"] || (win["modules"] = {}), scope = modules, cjs = win, seajs, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
