@@ -132,7 +132,7 @@ var Template = Class.create({
 			id = that._id,
 			value = name + '/' + id,
 			type = that._type,
-			template = doc.createElement('template'),
+			template = doc.createElement('div'),
 			beginNode, endNode
 			;
 
