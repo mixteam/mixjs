@@ -28,12 +28,12 @@ var Class = require('class'),
 				root : location.pathname.replace(/[^\/]+\.[^\/]+$/, ''),
 				appPath : 'apps/',
 				defaultApp : 'index',
-				maxStateLen : 100
+				stateLimit : 100
 			}, options || {});
 
 			that._started = false;
 			that._states = [];
-			that._stateIdx = -1;
+			that._stateIdx = 0;
 			that._move = null;
 		},
 
@@ -72,7 +72,7 @@ var Class = require('class'),
 					var sp = pair.split('=')
 						;
 
-					args[sp[0]] = sp[1];
+					sp[0] && (args[sp[0]] = sp[1]);
 				});
 			}
 
@@ -84,70 +84,63 @@ var Class = require('class'),
 				options = that._options,
 				root = options.root,
 				appPath = options.appPath,
-				maxStateLen = options.maxStateLen,
-
+				move = that._move,
 				states = that._states,
+				stateLimit = options.stateLimit,
+				stateLen = states.length,
 				stateIdx = that._stateIdx,
+
 				prev = states[stateIdx - 1],
 				last = states[stateIdx],
 				next = states[stateIdx + 1],
-
-				cur, move = that._move
+				cur = {
+					appname : appname,
+					fragment : fragment,
+					args : args,
+					params : []
+				}
 				;
 
 			// TODO 当使用浏览器的前进后退时，判断forward和backward会有点小问题
-			that._move = null;
-			if ((move && move === 'backward') || (!move &&
-					prev && prev.fragment === fragment)) {
-				move = 'backward';
-
-				if (stateIdx == 0) {
-					states.pop();
+			if (move == null) {
+				if (Object.keys(args).length === 0 && 
+						prev && prev.fragment === cur.fragment) {
+					move = 'backward';
 				} else {
+					move = 'forward';
+				}
+			}
+
+			if (move === 'backward') {
+				if (stateIdx === 0 && stateLen > 0) {
+					states.unshift(cur);
+				} else if (stateIdx > 0) {
 					stateIdx--;
-				}
-
-				if (prev) {
 					cur = prev;
-				} else {
-					cur = {
-						appname : appname,
-						params : [],
-						args : args,
-						fragment : fragment
-					};
-					states.push(cur);
 				}
-			} else if ((move && move ==='forward') || (!move &&
-						!next || next.fragment === fragment)) {
-				move = 'forward';
-
-				if (stateIdx == maxStateLen - 1) {
+			} else if (move === 'forward') {
+				if (stateIdx === stateLimit - 1) {
 					states.shift();
-				} else {
+					states.push(cur);
+				} else if (stateIdx === 0 && stateLen === 0) {
+					states.push(cur);
+				} else if (Object.keys(args).length === 0 && 
+								next && next.fragment === cur.fragment){
 					stateIdx++;
-				}
-
-				if (next) {
 					cur = next;
 				} else {
-					cur = {
-						appname : appname,
-						params : [],
-						args : args,
-						fragment : fragment
-					};
+					stateIdx++;
+					states.splice(stateIdx);
 					states.push(cur);
 				}
 			}
 
+			that._move = null;
 			that._stateIdx = stateIdx;
 
 			if (!last || last.appname != cur.appname) {
 				cur.appentry = [root, appPath, appname, 'entry.js']
 							.join('/').replace(/\/{2,}/g, '/');
-
-				console.log(cur.appentry);
 
 				history.trigger('navigator:' + move, cur.appname, cur.appentry);				
 			}
@@ -202,21 +195,22 @@ var Class = require('class'),
 			var that = this,
 				states = that._states,
 				stateIdx = that._stateIdx,
-				cur = states[stateIdx],
+				cur = states[stateIdx] || {},
 				args = []
 				;
 
 			that._move = 'forward';
 
 			if (fragment) {
-				if (!cur || argsObj || cur.fragment !== fragment) {
+				if (argsObj || cur.fragment !== fragment) {
 					if (argsObj) {
 						Object.each(argsObj, function(value, key) {
 							args.push(key + '=' + value)
 						});
 					}
 
-					states.splice(stateIdx + 1);
+					//states.splice(stateIdx + 1);
+
 					history.navigate(fragment + (args.length ? '!' + args.join('&') : ''));
 				}
 			} else {
@@ -229,7 +223,7 @@ var Class = require('class'),
 				stateIdx = that._stateIdx
 				;
 
-			if (stateIdx < 1) return;
+			if (stateIdx === 0) return;
 
 			that._move = 'backward';
 			his.back();
