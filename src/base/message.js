@@ -54,12 +54,14 @@ var Message = Class.create({
         var that = this,
             cache = that.__msgObj.cache,
             defaultContext = that.__msgObj.defaultContext,
-            matches = '', event, list;
+            matches, event, list;
 
         if (!callback) return that;
 
-        if ((matches = event.match(AT_REG))) {
+        if ((matches = events.match(AT_REG))) {
             events = events.split(AT_SPLITER)[1];
+        } else {
+            matches = ['']
         }
 
         events = events.split(SPLITER_REG);
@@ -87,7 +89,7 @@ var Message = Class.create({
             return that;
         }
 
-        if (events && matches = event.match(AT_REG)) {
+        if (events && (matches = event.match(AT_REG))) {
             events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
         } else {
             events = Object.keys(cache);

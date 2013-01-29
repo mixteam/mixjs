@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 require('reset');
 
 var Class = require('class'),
-    Message = requite('message'),
+    Message = require('message'),
 
 	win = window,
 	doc = win.document,
@@ -92,7 +92,7 @@ var Router = Class.create({
 
     match: function() {
     	var that = this,
-            options = that._
+            options = that._options,
     		handlers = that._handlers,
     		handler, fragment, unmatched = true
 			;
@@ -106,7 +106,7 @@ var Router = Class.create({
 
 			if(!handler.matched && 
 					handler.route.test(fragment)) {
-                unmatched = true;
+                unmatched = false;
 				handler.matched = true;
 				handler.callback(fragment);
 

@@ -2,9 +2,9 @@
 // Thanks to:
 //	-http://backbonejs.org
 //	-http://underscorejs.org
-define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/url/router-debug" ], function(require, exports, module) {
+define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug", "mix/core/0.3.0/url/router-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Message = requite("message"), Router = require("mix/core/0.3.0/url/router-debug"), NAMED_REGEXP = /\:(\w\w*)/g, SPLAT_REGEXP = /\*(\w\w*)/g, PERL_REGEXP = /P\<(\w\w*?)\>/g, ARGS_SPLITER = "!", //escapeRegExp  = /[-[\]{}()+?.,\\^$|#\s]/g,
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), Router = require("mix/core/0.3.0/url/router-debug"), NAMED_REGEXP = /\:(\w\w*)/g, SPLAT_REGEXP = /\*(\w\w*)/g, PERL_REGEXP = /P\<(\w\w*?)\>/g, ARGS_SPLITER = "!", //escapeRegExp  = /[-[\]{}()+?.,\\^$|#\s]/g,
     //routeRegExp = /^([^!]*?)(![^!]*?)?$/,
     win = window, doc = win.document, his = win.history, loc = win.location;
     var Navigate = Class.create({
@@ -30,9 +30,9 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             return routeText.replace(NAMED_REGEXP, "(P<$1>[^\\/]*?)").replace(SPLAT_REGEXP, "(P<$1>.*?)");
         },
         _extractNames: function(routeText) {
-            var matched = routeText.match(perlParam), names = {};
+            var matched = routeText.match(PERL_REGEXP), names = {};
             matched && Object.each(matched, function(name, i) {
-                names[name.replace(perlParam, "$1")] = i;
+                names[name.replace(PERL_REGEXP, "$1")] = i;
             });
             return names;
         },
@@ -48,7 +48,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             return args;
         },
         _parseRoute: function(routeText) {
-            routeText = routeText.replace(perlParam, "");
+            routeText = routeText.replace(PERL_REGEXP, "");
             return new RegExp("^(" + routeText + ")(" + ARGS_SPLITER + ".*?)?$");
         },
         _stateEquals: function(state1, state2) {
@@ -87,12 +87,13 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                     stateIdx++;
                     cur = next;
                 } else {
-                    states.splice(stateIdx++);
+                    stateIdx++;
+                    states.splice(stateIdx);
                     states.push(cur);
                 }
             }
             cur.move = move;
-            datas && cur.datas = datas;
+            datas && (cur.datas = datas);
             that._move = null;
             that._datas = null;
             that._stateIdx = stateIdx;
@@ -105,8 +106,14 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
         getState: function() {
             return this._states[this._stateIdx];
         },
+        getStateSize: function() {
+            return this._states.length;
+        },
+        getStateIndex: function() {
+            return this._stateIdx;
+        },
         addRoute: function(name, routeText, options) {
-            var that = this, callback, name, routeNames, routeReg;
+            var that = this, callback, routeNames, routeReg;
             if (arguments.length === 1) {
                 options = arguments[0];
                 name = null;
@@ -119,7 +126,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                     options.callback && options.callback(state);
                 });
             } else if (name && routeText) {
-                routeText = that._convertParames(routeText);
+                routeText = that._convertParams(routeText);
                 routeNames = that._extractNames(routeText);
                 routeReg = that._parseRoute(routeText);
                 that._routes[name] = routeReg;

@@ -69,7 +69,7 @@ if (!Object.extend) {
 
         Object.each(args, function(target) {
             Object.each(target, function(value, name) {
-                src[name] = Object.clone(value, deeply);
+                src[name] = deeply ? Object.clone(value) : value;
             });
         });
 

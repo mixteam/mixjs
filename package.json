@@ -24,21 +24,13 @@
         "selector" : "mix/core/0.3.0/dom/selector",
         "event" : "mix/core/0.3.0/dom/event",
         "ajax" : "mix/core/0.3.0/dom/ajax",
-        "animation" : "mix/core/0.3.0/dom/animation",
-
-        "template" : "mix/core/0.3.0/ui/template",
-        "module" : "mix/core/0.3.0/ui/module",
-        "component" : "mix/core/0.3.0/ui/component",
-
-        "controller" : "mix/core/0.3.0/mvc/controller",
-        "navigator" : "mix/core/0.3.0/mvc/navigator",
-        "view" : "mix/core/0.3.0/mvc/view",
-        "model" : "mix/core/0.3.0/mvc/model",
-        "orm" : "mix/core/0.3.0/mvc/orm"
+        "animation" : "mix/core/0.3.0/dom/animation"
     },
     "output" : {
-        "*.js" : ".",
-        "*/*.js" : ".",
+        "cjs.js" : ".",
+        "base/*.js" : ".",
+        "url/*.js" : ".",
+        "dom/*.js" : ".",
 
         "mix.js" : {
             "main" : "base/reset.js",
@@ -51,27 +43,10 @@
                 "url/router.js",
                 "url/navigate.js",
 
-                "detect/detect.js",
-                "detect/ability.js",
-                "detect/deviceapi.js",
-                "detect/hardware.js",
-                "detect/network.js",
-                "detect/ua.js",
-
                 "dom/selector.js",
                 "dom/event.js",
                 "dom/ajax.js",
-                "dom/animation.js",
-
-                "ui/template.js",
-                "ui/module.js",
-                "ui/component.js",
-
-                "mvc/controller.js",
-                "mvc/navigator.js",
-                "mvc/view.js",
-                "mvc/model.js",
-                "mvc/orm.js"
+                "dom/animation.js"
             ]
         }
     }

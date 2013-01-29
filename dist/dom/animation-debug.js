@@ -1,7 +1,7 @@
 //     Zepto.js
 //     (c) 2010-2012 Thomas Fuchs
 //     Zepto.js may be freely distributed under the MIT license.
-define("#mix/core/0.3.0/dom/animation/animation-debug", [ "mix/core/0.3.0/dom/selector-debug" ], function(require, exports, module) {
+define("#mix/core/0.3.0/dom/animation-debug", [ "mix/core/0.3.0/dom/selector-debug" ], function(require, exports, module) {
     var Selector = require("mix/core/0.3.0/dom/selector-debug");
     (function($) {
         var prefix = "", eventPrefix, endEventName, endAnimationName, vendors = {

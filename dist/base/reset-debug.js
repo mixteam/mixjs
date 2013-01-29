@@ -54,7 +54,7 @@ define("#mix/core/0.3.0/base/reset-debug", [], function(require, exports, module
             }
             Object.each(args, function(target) {
                 Object.each(target, function(value, name) {
-                    src[name] = Object.clone(value, deeply);
+                    src[name] = deeply ? Object.clone(value) : value;
                 });
             });
             return src;

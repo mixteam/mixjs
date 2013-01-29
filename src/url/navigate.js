@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 require('reset');
 
 var Class = require('class'),
-	Message = requite('message'),
+	Message = require('message'),
 	Router = require('router'),
 	NAMED_REGEXP = /\:(\w\w*)/g,
 	SPLAT_REGEXP = /\*(\w\w*)/g,
@@ -54,12 +54,12 @@ var Navigate = Class.create({
 		},
 
 		_extractNames : function(routeText) {
-			var matched = routeText.match(perlParam),
+			var matched = routeText.match(PERL_REGEXP),
 				names = {}
 				;
 
 			matched && Object.each(matched, function(name, i) {
-				names[name.replace(perlParam, '$1')] = i;
+				names[name.replace(PERL_REGEXP, '$1')] = i;
 			});
 
 			return names;
@@ -83,7 +83,7 @@ var Navigate = Class.create({
 		},
 
 		_parseRoute : function(routeText) {
-			routeText = routeText.replace(perlParam, '');
+			routeText = routeText.replace(PERL_REGEXP, '');
 
 			return new RegExp('^(' + routeText + ')(' + ARGS_SPLITER + '.*?)?$');
 		},
@@ -143,13 +143,14 @@ var Navigate = Class.create({
 					stateIdx++;
 					cur = next;
 				} else {
-					states.splice(stateIdx++);
+					stateIdx++;
+					states.splice(stateIdx);
 					states.push(cur);
 				}
 			}
 
 			cur.move = move;
-			datas && cur.datas = datas;
+			datas && (cur.datas = datas);
 
 			that._move = null;
 			that._datas = null;
@@ -168,9 +169,17 @@ var Navigate = Class.create({
 			return this._states[this._stateIdx];
 		},
 
+		getStateSize : function() {
+			return this._states.length;
+		},
+
+		getStateIndex : function() {
+			return this._stateIdx;
+		},
+
 		addRoute : function(name, routeText, options) {
 			var that = this,
-				callback, name,
+				callback,
 				routeNames, routeReg
 				;
 
@@ -188,7 +197,7 @@ var Navigate = Class.create({
 					options.callback && options.callback(state);
 				});
 			} else if (name && routeText) {
-				routeText = that._convertParames(routeText);
+				routeText = that._convertParams(routeText);
 				routeNames = that._extractNames(routeText);
 				routeReg = that._parseRoute(routeText);
 

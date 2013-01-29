@@ -1,7 +1,7 @@
 //     Zepto.js
 //     (c) 2010-2012 Thomas Fuchs
 //     Zepto.js may be freely distributed under the MIT license.
-define("#mix/core/0.3.0/dom/ajax/ajax-debug", [ "mix/core/0.3.0/dom/selector-debug" ], function(require, exports, module) {
+define("#mix/core/0.3.0/dom/ajax-debug", [ "mix/core/0.3.0/dom/selector-debug" ], function(require, exports, module) {
     var Selector = require("mix/core/0.3.0/dom/selector-debug");
     (function($) {
         var jsonpID = 0, isObject = $.isObject, document = window.document, key, name, rscript = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, scriptTypeRE = /^(?:text|application)\/javascript/i, xmlTypeRE = /^(?:text|application)\/xml/i, jsonType = "application/json", htmlType = "text/html", blankRE = /^\s*$/, specialEvents = {};

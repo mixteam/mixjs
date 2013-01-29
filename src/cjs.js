@@ -12,7 +12,7 @@
 		ID_REG_POSTFIX = /\.js$/i,
 		modules = win['modules'] || (win['modules'] = {}),
 		scope = modules,
-		cjs = win, seajs,
+		cjs = win,
 		head = win.head || doc.head,
 		basePath = '', 
 		aliasReg = [], 
@@ -45,8 +45,7 @@
 	}
 
 	function buildRequire(moduleId, dependencies) {
-		var //innerScope = {},
-			moduleIdPath = moduleId.split(NS_SEP)
+		var moduleIdPath = moduleId.split(NS_SEP)
 			;
 
 		moduleIdPath.pop();
@@ -76,9 +75,9 @@
 				resolvedId[depsId] = resolvedDepsId;
 			}
 
-			// if (!(innerScope[depsId] = findNS(scope, resolvedDepsId || depsId))) {
-			// 	throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
-			// }
+			if (!findNS(scope, resolvedDepsId || depsId)) {
+				throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
+			}
 		});
 
 		return function(id) {
@@ -142,21 +141,20 @@
 		if (url.indexOf('http') < 0) {
 			url = basePath + url;
 		}
-		
+
+		script.loaded = false;
 		script.type = 'text/javascript';
 		script.async = true;
 		script.onload = script.onreadystatechange  = function() {
-			callback && callback();
+			if (!script.loaded) {
+				script.loaded = true;
+				callback && callback();
+			}
 		}
-
 
 		script.src = url;
 		head.appendChild(script);
 	}
-
-	cjs.define = define;
-	cjs.require = require;
-	cjs.load = load;
 
 	function use(dependencies, callback) {
 
@@ -167,13 +165,13 @@
 		}
 
 		dependencies.forEach(function(id) {
-			args.push(require(id, true));
+			args.push(require(id));
 		});
 
 		callback && callback.apply(win, args);
 	}
 
-	function config(opt) {
+	function alias(opt) {
 		basePath = opt.basePath;
 
 		if (opt.alias) {
@@ -187,10 +185,10 @@
 		}
 	}
 
-	if (!win['seajs']) {
-		seajs = win['seajs'] = {
-			use : use,
-			config : config
-		};
-	}
+	cjs.define = define;
+	cjs.require = require;
+	cjs.load = load;
+	cjs.use = use;
+	cjs.alias = alias;
+
 })(window, window.document);

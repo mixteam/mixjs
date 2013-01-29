@@ -4,7 +4,7 @@
 */
 (function(win, doc, undef) {
     if (win["define"]) return;
-    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, modules = win["modules"] || (win["modules"] = {}), scope = modules, cjs = win, seajs, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
+    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, modules = win["modules"] || (win["modules"] = {}), scope = modules, cjs = win, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
     function parseId(id, useAlias) {
         if (resolvedId[id]) {
             return resolvedId[id];
@@ -24,8 +24,7 @@
         return ns[name];
     }
     function buildRequire(moduleId, dependencies) {
-        var //innerScope = {},
-        moduleIdPath = moduleId.split(NS_SEP);
+        var moduleIdPath = moduleId.split(NS_SEP);
         moduleIdPath.pop();
         dependencies.forEach(function(depsId) {
             var depsIdPath, resolvedPath, resolvedDepsId, path;
@@ -44,6 +43,9 @@
             }
             if (resolvedDepsId && depsId !== resolvedDepsId) {
                 resolvedId[depsId] = resolvedDepsId;
+            }
+            if (!findNS(scope, resolvedDepsId || depsId)) {
+                throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
             }
         });
         return function(id) {
@@ -91,28 +93,29 @@
         if (url.indexOf("http") < 0) {
             url = basePath + url;
         }
+        script.loaded = false;
         script.type = "text/javascript";
         script.async = true;
         script.onload = script.onreadystatechange = function() {
-            callback && callback();
+            if (!script.loaded) {
+                script.loaded = true;
+                callback && callback();
+            }
         };
         script.src = url;
         head.appendChild(script);
     }
-    cjs.define = define;
-    cjs.require = require;
-    cjs.load = load;
     function use(dependencies, callback) {
         var args = [];
         if (typeof dependencies === "string") {
             dependencies = [ dependencies ];
         }
         dependencies.forEach(function(id) {
-            args.push(require(id, true));
+            args.push(require(id));
         });
         callback && callback.apply(win, args);
     }
-    function config(opt) {
+    function alias(opt) {
         basePath = opt.basePath;
         if (opt.alias) {
             for (var name in opt.alias) {
@@ -122,10 +125,9 @@
             }
         }
     }
-    if (!win["seajs"]) {
-        seajs = win["seajs"] = {
-            use: use,
-            config: config
-        };
-    }
+    cjs.define = define;
+    cjs.require = require;
+    cjs.load = load;
+    cjs.use = use;
+    cjs.alias = alias;
 })(window, window.document);

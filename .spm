@@ -1,0 +1,57 @@
+Scanning for projects...
+
+------------------------------------------------------------------------
+Building mix/core 0.3.0
+------------------------------------------------------------------------
+PROCESSING MODULE base\class.js
+GENERATE ID    #mix/core/0.3.0/base/class
+PROCESSING MODULE base\message.js
+GENERATE ID    #mix/core/0.3.0/base/message
+PROCESSING MODULE base\reset.js
+GENERATE ID    #mix/core/0.3.0/base/reset
+PROCESSING MODULE base\util.js
+GENERATE ID    #mix/core/0.3.0/base/util
+PROCESSING MODULE dom\ajax\ajax.js
+GENERATE ID    #mix/core/0.3.0/dom/ajax/ajax
+[33m [WARN] Cannot find module (mix/core/0.3.0/dom/selector) from sources!  [39m
+PROCESSING MODULE dom\animation\animation.js
+GENERATE ID    #mix/core/0.3.0/dom/animation/animation
+PROCESSING MODULE dom\event\event.js
+GENERATE ID    #mix/core/0.3.0/dom/event/event
+PROCESSING MODULE dom\selector\selector.js
+GENERATE ID    #mix/core/0.3.0/dom/selector/selector
+PROCESSING MODULE mvc\controller\controller.js
+GENERATE ID    #mix/core/0.3.0/mvc/controller/controller
+[33m [WARN] Not Found history dependency!  [39m
+PROCESSING MODULE mvc\model\model.js
+GENERATE ID    #mix/core/0.3.0/mvc/model/model
+PROCESSING MODULE mvc\navigator\navigator.js
+GENERATE ID    #mix/core/0.3.0/mvc/navigator/navigator
+[33m [WARN] Cannot find module (mix/core/0.3.0/mvc/controller) from sources!  [39m
+PROCESSING MODULE mvc\orm\orm.js
+GENERATE ID    #mix/core/0.3.0/mvc/orm/orm
+[33m [WARN] Cannot find module (mix/core/0.3.0/mvc/model) from sources!  [39m
+PROCESSING MODULE mvc\view\view.js
+GENERATE ID    #mix/core/0.3.0/mvc/view/view
+[33m [WARN] Cannot find module (mix/core/0.3.0/ui/template) from sources!  [39m
+[33m [WARN] Cannot find module (mix/core/0.3.0/ui/component) from sources!  [39m
+[33m [WARN] Cannot find module (mix/core/0.3.0/dom/event) from sources!  [39m
+[33m [WARN] Cannot find module (mix/core/0.3.0/dom/ajax) from sources!  [39m
+PROCESSING MODULE ui\component\component.js
+GENERATE ID    #mix/core/0.3.0/ui/component/component
+[33m [WARN] Cannot find module (mix/core/0.3.0/ui/module) from sources!  [39m
+PROCESSING MODULE ui\module\module.js
+GENERATE ID    #mix/core/0.3.0/ui/module/module
+PROCESSING MODULE ui\template\template.js
+GENERATE ID    #mix/core/0.3.0/ui/template/template
+PROCESSING MODULE url\navigate.js
+GENERATE ID    #mix/core/0.3.0/url/navigate
+PROCESSING MODULE url\router.js
+GENERATE ID    #mix/core/0.3.0/url/router
+------------------------------------------------------------------------
+BUILD MIX/CORE SUCCESS!
+------------------------------------------------------------------------
+Total time: 10.276s
+Finished at: Mon Jan 28 2013 15:25:42 GMT+0800 (中国标准时间)
+Final Memory: 23M/43M
+------------------------------------------------------------------------

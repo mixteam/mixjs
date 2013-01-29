@@ -1,7 +1,7 @@
 //     Zepto.js
 //     (c) 2010-2012 Thomas Fuchs
 //     Zepto.js may be freely distributed under the MIT license.
-define("#mix/core/0.3.0/dom/selector/selector-debug", [], function(require, exports, module) {
+define("#mix/core/0.3.0/dom/selector-debug", [], function(require, exports, module) {
     var undefined, key, $, classList, emptyArray = [], slice = emptyArray.slice, document = window.document, elementDisplay = {}, classCache = {}, getComputedStyle = document.defaultView.getComputedStyle, cssNumber = {
         "column-count": 1,
         columns: 1,

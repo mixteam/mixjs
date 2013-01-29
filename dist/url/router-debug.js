@@ -2,9 +2,9 @@
 // Thanks to:
 //	-http://backbonejs.org
 //	-http://underscorejs.org
-define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug" ], function(require, exports, module) {
+define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Message = requite("message"), win = window, doc = win.document, loc = win.location, his = win.Router;
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), win = window, doc = win.document, loc = win.location, his = win.Router;
     var Router = Class.create({
         Implements: Message,
         initialize: function() {
@@ -53,14 +53,13 @@ define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", 
             return true;
         },
         match: function() {
-            var that = this, options = that._;
-            handlers = that._handlers, handler, fragment, unmatched = true;
+            var that = this, options = that._options, handlers = that._handlers, handler, fragment, unmatched = true;
             if (!Router.started) return;
             fragment = that._fragment = that._getHash();
             for (var i = 0; i < handlers.length; i++) {
                 handler = handlers[i];
                 if (!handler.matched && handler.route.test(fragment)) {
-                    unmatched = true;
+                    unmatched = false;
                     handler.matched = true;
                     handler.callback(fragment);
                     if (handler.last) break;

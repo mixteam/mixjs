@@ -34,10 +34,12 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
         // Bind one or more space separated events, `events`, to a `callback`
         // function. Passing `"all"` will bind the callback to all events fired.
         on: function(events, callback, context) {
-            var that = this, cache = that.__msgObj.cache, defaultContext = that.__msgObj.defaultContext, matches = "", event, list;
+            var that = this, cache = that.__msgObj.cache, defaultContext = that.__msgObj.defaultContext, matches, event, list;
             if (!callback) return that;
-            if (matches = event.match(AT_REG)) {
+            if (matches = events.match(AT_REG)) {
                 events = events.split(AT_SPLITER)[1];
+            } else {
+                matches = [ "" ];
             }
             events = events.split(SPLITER_REG);
             while (event = events.shift()) {
@@ -57,7 +59,7 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
                 delete that.__msgObj.events;
                 return that;
             }
-            if (events && matches = event.match(AT_REG)) {
+            if (events && (matches = event.match(AT_REG))) {
                 events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
             } else {
                 events = Object.keys(cache);
