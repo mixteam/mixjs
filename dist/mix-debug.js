@@ -65,6 +65,7 @@ define("#mix/core/0.3.0/base/reset-debug", [], function(require, exports, module
         Object.isTypeof = function(value, istype) {
             var str = toString.call(value).toLowerCase(), matched = TYPE_REGEXP.exec(str), type;
             if (!matched) return;
+            type = matched[1];
             if (istype) {
                 return type === istype.toLowerCase();
             } else {
@@ -147,6 +148,29 @@ define("#mix/core/0.3.0/base/reset-debug", [], function(require, exports, module
         var LEFT_TRIM = /^\s\s*/, RIGHT_TRIM = /\s\s*$/;
         String.prototype.trim = function() {
             return this.replace(LEFT_TRIM, "").replace(RIGHT_TRIM, "");
+        };
+    }
+    //
+    // Function
+    //
+    if (!Function.prototype.bind) {
+        var ctor = function() {};
+        Function.prototype.bind = function(context) {
+            var func = this, //protoBind = Function.prototype.bind,
+            args = Array.make(arguments), bound;
+            // if (func.bind === protoBind && protoBind) 
+            //     return protoBind.apply(func, slice.call(arguments, 1));
+            if (!Object.isTypeof(func, "function")) throw new TypeError();
+            args = args.slice(1);
+            return bound = function() {
+                var _args = Array.make(arguments);
+                if (!(this instanceof bound)) return func.apply(context, args.concat(_args));
+                ctor.prototype = func.prototype;
+                var self = new ctor();
+                var result = func.apply(self, args.concat(_args));
+                if (Object(result) === result) return result;
+                return self;
+            };
         };
     }
 });
@@ -463,12 +487,12 @@ define("#mix/core/0.3.0/base/util-debug", [ "mix/core/0.3.0/base/reset-debug", "
 //	-http://underscorejs.org
 define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), win = window, doc = win.document, loc = win.location, his = win.Router;
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), win = window, doc = win.document, loc = win.location;
     var Router = Class.create({
         Implements: Message,
         initialize: function() {
             var that = this;
-            Message.prototype.initialize.call(that, "navigate");
+            Message.prototype.initialize.call(that, "router");
             that._handlers = [];
             that._options = {};
             that._changeHanlder = that._changeHanlder.bind(that);

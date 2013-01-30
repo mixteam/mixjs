@@ -11,8 +11,7 @@ var Class = require('class'),
 
 	win = window,
 	doc = win.document,
-	loc = win.location,
-	his = win.Router
+	loc = win.location
 	;
 
 var Router = Class.create({
@@ -22,7 +21,7 @@ var Router = Class.create({
 		var that = this
 			;
 
-        Message.prototype.initialize.call(that, 'navigate');
+        Message.prototype.initialize.call(that, 'router');
 
 		that._handlers = [];
 		that._options = {};

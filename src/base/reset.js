@@ -87,6 +87,8 @@ if (!Object.isTypeof) {
 
         if (!matched) return;
 
+        type = matched[1];
+
         if (istype) {
             return type === istype.toLowerCase();
         } else {
@@ -198,5 +200,45 @@ if (!String.prototype.trim) {
     String.prototype.trim = function () {
         return this.replace(LEFT_TRIM, '').replace(RIGHT_TRIM, '');
     };
+}
+
+//
+// Function
+//
+if (!Function.prototype.bind) {
+    var ctor = function(){}
+        ;
+
+    Function.prototype.bind = function(context) {
+        var func = this,
+            //protoBind = Function.prototype.bind,
+            args = Array.make(arguments),
+            bound
+            ;
+
+        // if (func.bind === protoBind && protoBind) 
+        //     return protoBind.apply(func, slice.call(arguments, 1));
+
+        if (!Object.isTypeof(func, 'function')) throw new TypeError;
+
+        args = args.slice(1);
+
+        return bound = function() {
+            var _args = Array.make(arguments)
+                ;
+
+            if (!(this instanceof bound)) 
+                return func.apply(context, args.concat(_args));
+
+            ctor.prototype = func.prototype;
+            var self = new ctor;
+            var result = func.apply(self, args.concat(_args));
+
+            if (Object(result) === result) 
+                return result;
+            
+            return self;
+        };
+    }
 }
 });

@@ -88,46 +88,45 @@
             throw new Error(moduleId + " has not defined");
         }
     }
-    function load(url, callback) {
-        var script = doc.createElement("script");
-        if (url.indexOf("http") < 0) {
-            url = basePath + url;
-        }
-        script.loaded = false;
-        script.type = "text/javascript";
-        script.async = true;
-        script.onload = script.onreadystatechange = function() {
-            if (!script.loaded) {
-                script.loaded = true;
-                callback && callback();
-            }
-        };
-        script.src = url;
-        head.appendChild(script);
-    }
-    function use(dependencies, callback) {
-        var args = [];
-        if (typeof dependencies === "string") {
-            dependencies = [ dependencies ];
-        }
-        dependencies.forEach(function(id) {
-            args.push(require(id));
-        });
-        callback && callback.apply(win, args);
-    }
-    function alias(opt) {
-        basePath = opt.basePath;
-        if (opt.alias) {
-            for (var name in opt.alias) {
-                var value = opt.alias[name];
-                aliasReg.push(new RegExp("^" + name, "i"));
-                aliasRep.push(value);
-            }
-        }
-    }
+    // function load(url, callback) {
+    // 	var script = doc.createElement('script')
+    // 		;
+    // 	if (url.indexOf('http') < 0) {
+    // 		url = basePath + url;
+    // 	}
+    // 	script.loaded = false;
+    // 	script.type = 'text/javascript';
+    // 	script.async = true;
+    // 	script.onload = script.onreadystatechange  = function() {
+    // 		if (!script.loaded) {
+    // 			script.loaded = true;
+    // 			callback && callback();
+    // 		}
+    // 	}
+    // 	script.src = url;
+    // 	head.appendChild(script);
+    // }
+    // function use(dependencies, callback) {
+    // 	var args = [];
+    // 	if (typeof dependencies === 'string') {
+    // 		dependencies = [dependencies];
+    // 	}
+    // 	dependencies.forEach(function(id) {
+    // 		args.push(require(id));
+    // 	});
+    // 	callback && callback.apply(win, args);
+    // }
+    // function alias(opt) {
+    // 	basePath = opt.basePath;
+    // 	if (opt.alias) {
+    // 		for (var name in opt.alias) {
+    // 			var value = opt.alias[name]
+    // 				;
+    // 			aliasReg.push(new RegExp('^' + name, 'i'));
+    // 			aliasRep.push(value);
+    // 		}
+    // 	}
+    // }
     cjs.define = define;
     cjs.require = require;
-    cjs.load = load;
-    cjs.use = use;
-    cjs.alias = alias;
 })(window, window.document);

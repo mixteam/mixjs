@@ -4,12 +4,12 @@
 //	-http://underscorejs.org
 define("#mix/core/0.3.0/url/router-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/core/0.3.0/base/message-debug" ], function(require, exports, module) {
     require("mix/core/0.3.0/base/reset-debug");
-    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), win = window, doc = win.document, loc = win.location, his = win.Router;
+    var Class = require("mix/core/0.3.0/base/class-debug"), Message = require("mix/core/0.3.0/base/message-debug"), win = window, doc = win.document, loc = win.location;
     var Router = Class.create({
         Implements: Message,
         initialize: function() {
             var that = this;
-            Message.prototype.initialize.call(that, "navigate");
+            Message.prototype.initialize.call(that, "router");
             that._handlers = [];
             that._options = {};
             that._changeHanlder = that._changeHanlder.bind(that);
