@@ -25,27 +25,21 @@ var Class = require('class'),
 var Navigate = Class.create({
 		Implements : Message,
 
-		initialize : function(options, globalRouter){
+		initialize : function(options){
 			var that = this
 				;
 
 			Message.prototype.initialize.call(that, 'navigate');
 
-			that._options = Object.extend({
-				stateLimit : 100
-			}, options || {});
+			that._move = null;
+			that._datas = null;
+			that._routes = {};
 
 			that._states = [];
 			that._stateIdx = 0;
-			that._move = null;
-			that._datas = null;
+			that._stateLimit = options.stateLimit || 100;
 
-			that._routes = {};
-			if (globalRouter === true) {
-				that._router = Router.singleton;
-			}  else {
-				that._router = new Router();
-			}
+			that._router = options.useRouter;
 		},
 
 		_convertParams : function(routeText) {
@@ -99,11 +93,10 @@ var Navigate = Class.create({
 		},
 
 		_pushState : function(name, fragment, params, args) {
-			var that = this,
-				options = that._options,
-				stateLimit = options.stateLimit,
+			var that = this,				
 				states = that._states,
 				stateIdx = that._stateIdx,
+				stateLimit = that._stateLimit,
 				stateLen = states.length,
 				move = that._move,
 				datas = that._datas,
@@ -161,20 +154,18 @@ var Navigate = Class.create({
 			return cur;
 		},
 
-		getRouter : function() {
-			return this._router;
-		},
-
 		getState : function() {
-			return this._states[this._stateIdx];
-		},
+			var that = this
+				;
 
-		getStateSize : function() {
-			return this._states.length;
+			return that._states[that._stateIdx];
 		},
 
 		getStateIndex : function() {
-			return this._stateIdx;
+			var that = this
+				;
+
+			return that._stateIdx;
 		},
 
 		addRoute : function(name, routeText, options) {
@@ -271,7 +262,9 @@ var Navigate = Class.create({
 	})
 	;
 
-Navigate.singleton = new Navigate({}, true);
+Navigate.singleton = new Navigate({
+	useRouter : Router.singleton
+});
 
 module.exports = Navigate;
 

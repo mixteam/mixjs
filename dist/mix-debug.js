@@ -593,22 +593,16 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
     win = window, doc = win.document, his = win.history, loc = win.location;
     var Navigate = Class.create({
         Implements: Message,
-        initialize: function(options, globalRouter) {
+        initialize: function(options) {
             var that = this;
             Message.prototype.initialize.call(that, "navigate");
-            that._options = Object.extend({
-                stateLimit: 100
-            }, options || {});
-            that._states = [];
-            that._stateIdx = 0;
             that._move = null;
             that._datas = null;
             that._routes = {};
-            if (globalRouter === true) {
-                that._router = Router.singleton;
-            } else {
-                that._router = new Router();
-            }
+            that._states = [];
+            that._stateIdx = 0;
+            that._stateLimit = options.stateLimit || 100;
+            that._router = options.useRouter;
         },
         _convertParams: function(routeText) {
             return routeText.replace(NAMED_REGEXP, "(P<$1>[^\\/]*?)").replace(SPLAT_REGEXP, "(P<$1>.*?)");
@@ -641,7 +635,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             return true;
         },
         _pushState: function(name, fragment, params, args) {
-            var that = this, options = that._options, stateLimit = options.stateLimit, states = that._states, stateIdx = that._stateIdx, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
+            var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
                 name: name,
                 fragment: fragment,
                 params: params,
@@ -684,17 +678,13 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             that.trigger(move, cur);
             return cur;
         },
-        getRouter: function() {
-            return this._router;
-        },
         getState: function() {
-            return this._states[this._stateIdx];
-        },
-        getStateSize: function() {
-            return this._states.length;
+            var that = this;
+            return that._states[that._stateIdx];
         },
         getStateIndex: function() {
-            return this._stateIdx;
+            var that = this;
+            return that._stateIdx;
         },
         addRoute: function(name, routeText, options) {
             var that = this, callback, routeNames, routeReg;
@@ -755,7 +745,9 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             his.back();
         }
     });
-    Navigate.singleton = new Navigate({}, true);
+    Navigate.singleton = new Navigate({
+        useRouter: Router.singleton
+    });
     module.exports = Navigate;
 });
 
