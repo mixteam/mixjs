@@ -1,0 +1,1 @@
+(function(){DETECT=DETECT||{},DETECT.plugins=DETECT.plugins||{},DETECT.plugins.Ability={}})(window);

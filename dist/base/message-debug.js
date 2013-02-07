@@ -36,7 +36,7 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
         on: function(events, callback, context) {
             var that = this, cache = that.__msgObj.cache, defaultContext = that.__msgObj.defaultContext, matches, event, list;
             if (!callback) return that;
-            if (matches = events.match(AT_REG)) {
+            if (events && (matches = events.match(AT_REG))) {
                 events = events.split(AT_SPLITER)[1];
             } else {
                 matches = [ "" ];
@@ -59,10 +59,11 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
                 delete that.__msgObj.events;
                 return that;
             }
-            if (events && (matches = event.match(AT_REG))) {
+            if (events && (matches = events.match(AT_REG))) {
                 events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
             } else {
                 events = Object.keys(cache);
+                matches = [ "" ];
             }
             // Loop through the callback list, splicing where appropriate.
             while (event = events.shift()) {

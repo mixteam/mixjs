@@ -1,3 +1,136 @@
+/**
+* @fileOverview get fun with CommonJS!
+* @author zhuxun.jb@taobao.com
+*/
+(function(win, doc, undef) {
+    if (win["define"]) return;
+    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, modules = win["modules"] || (win["modules"] = {}), scope = modules, cjs = win, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
+    function parseId(id, useAlias) {
+        if (resolvedId[id]) {
+            return resolvedId[id];
+        }
+        var _id = id.replace(ID_REG_PREFIX, "").replace(ID_REG_POSTFIX, "");
+        if (useAlias) {
+            aliasReg.forEach(function(reg, i) {
+                _id = _id.replace(reg, aliasRep[i]);
+            });
+        }
+        return resolvedId[id] = _id;
+    }
+    function defineNS(ns, name) {
+        return ns[name] || (ns[name] = {});
+    }
+    function findNS(ns, name) {
+        return ns[name];
+    }
+    function buildRequire(moduleId, dependencies) {
+        var moduleIdPath = moduleId.split(NS_SEP);
+        moduleIdPath.pop();
+        dependencies.forEach(function(depsId) {
+            var depsIdPath, resolvedPath, resolvedDepsId, path;
+            depsId = parseId(depsId, true);
+            if (depsId.indexOf(".") === 0) {
+                depsIdPath = depsId.split(NS_SEP);
+                resolvedPath = moduleIdPath.slice();
+                while (path = depsIdPath.shift()) {
+                    if (path === "..") {
+                        resolvedPath.pop();
+                    } else if (path !== ".") {
+                        resolvedPath.push(path);
+                    }
+                }
+                resolvedDepsId = resolvedPath.join(NS_SEP);
+            }
+            if (resolvedDepsId && depsId !== resolvedDepsId) {
+                resolvedId[depsId] = resolvedDepsId;
+            }
+            if (!findNS(scope, resolvedDepsId || depsId)) {
+                throw new Error('require a undefined module "' + (resolvedDepsId || depsId) + '" in "' + moduleId + '"');
+            }
+        });
+        return function(id) {
+            return require(id);
+        };
+    }
+    function define(moduleId, dependencies, factory) {
+        var require, module, exports;
+        moduleId = parseId(moduleId);
+        module = defineNS(scope, moduleId);
+        exports = module.exports;
+        if (exports) {
+            throw new Error(moduleId + " has already defined");
+        } else {
+            module.id = moduleId;
+            exports = module.exports = {};
+        }
+        require = buildRequire(moduleId, dependencies);
+        if (typeof factory === "function") {
+            module.executed = false;
+            module.factory = factory;
+            module.exports = function() {
+                var module = this, factory = module.factory;
+                module.exports = factory(require, module.exports, module) || module.exports;
+                module.executed = true;
+                delete module.factory;
+                return module.exports;
+            };
+        } else {
+            module.executed = true;
+            module.exports = factory;
+        }
+    }
+    function require(moduleId) {
+        moduleId = parseId(moduleId, true);
+        var module = findNS(scope, moduleId);
+        if (module && module.exports) {
+            return module.executed ? module.exports : module.exports();
+        } else {
+            throw new Error(moduleId + " has not defined");
+        }
+    }
+    // function load(url, callback) {
+    // 	var script = doc.createElement('script')
+    // 		;
+    // 	if (url.indexOf('http') < 0) {
+    // 		url = basePath + url;
+    // 	}
+    // 	script.loaded = false;
+    // 	script.type = 'text/javascript';
+    // 	script.async = true;
+    // 	script.onload = script.onreadystatechange  = function() {
+    // 		if (!script.loaded) {
+    // 			script.loaded = true;
+    // 			callback && callback();
+    // 		}
+    // 	}
+    // 	script.src = url;
+    // 	head.appendChild(script);
+    // }
+    // function use(dependencies, callback) {
+    // 	var args = [];
+    // 	if (typeof dependencies === 'string') {
+    // 		dependencies = [dependencies];
+    // 	}
+    // 	dependencies.forEach(function(id) {
+    // 		args.push(require(id));
+    // 	});
+    // 	callback && callback.apply(win, args);
+    // }
+    // function alias(opt) {
+    // 	basePath = opt.basePath;
+    // 	if (opt.alias) {
+    // 		for (var name in opt.alias) {
+    // 			var value = opt.alias[name]
+    // 				;
+    // 			aliasReg.push(new RegExp('^' + name, 'i'));
+    // 			aliasRep.push(value);
+    // 		}
+    // 	}
+    // }
+    cjs.define = define;
+    cjs.require = require;
+})(window, window.document);
+
 define("#mix/core/0.3.0/base/reset-debug", [], function(require, exports, module) {
     var undef, toString = Object.prototype.toString, hasOwnProperty = Object.prototype.hasOwnProperty, slice = Array.prototype.slice;
     //
@@ -352,7 +485,7 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
                 delete that.__msgObj.events;
                 return that;
             }
-            if (events && (matches = event.match(AT_REG))) {
+            if (events && (matches = events.match(AT_REG))) {
                 events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
             } else {
                 events = Object.keys(cache);
@@ -1901,4 +2034,270 @@ define("#mix/core/0.3.0/dom/animation-debug", [ "mix/core/0.3.0/dom/selector-deb
             speeds: speeds
         });
     })(Selector);
+});
+
+define("#mix/core/0.3.0/ui/template-debug", [ "mix/core/0.3.0/base/reset-debug", "mix/core/0.3.0/base/class-debug", "mix/libs/handlebars/1.0.5/handlebars-debug" ], function(require, exports, module) {
+    require("mix/core/0.3.0/base/reset-debug");
+    var Class = require("mix/core/0.3.0/base/class-debug"), Handlebars = require("mix/libs/handlebars/1.0.5/handlebars-debug"), undef = undefined, win = window, doc = win.document;
+    /**
+ * @class Template
+ */
+    var Template = Class.create({
+        /**
+	 * the constructor for Template
+	 * @constructor
+	 * @param {string=} name
+	 * @param {Template=} root
+	 */
+        initialize: function(name, type, root) {
+            var that = this;
+            that._id = Template.id();
+            that._name = name || "template" + that._id;
+            that._type = type || "template";
+            that._root = root || "root";
+            that._helpers = {};
+            that._partials = {};
+            that._chunks = {};
+            that._html = "";
+            that._nodeList = [];
+        },
+        _init: function() {
+            var that = this;
+            that._helpers = Object.extend(that._helpers, Handlebars.helpers);
+            that._partials = Object.extend(that._partials, Handlebars.partials);
+            // init helpers/partials/chunks
+            Template.helpers(that);
+            Template.partials(that);
+            Template.chunks(that);
+        },
+        /**
+	 * add a helper for template
+	 * @param {string} name
+	 * @param {Function} helper
+	 */
+        addHelper: function(name, helper) {
+            var that = this;
+            if (arguments.length === 1) {
+                Object.each(arguments[0], function(helper, name) {
+                    that.addHelper(name, helper);
+                });
+                return;
+            }
+            that._helpers[name] = helper;
+        },
+        /**
+	 * add a partial for template
+	 * @param {string} name
+	 * @param {string} partial
+	 */
+        addPartial: function(name, partial) {
+            var that = this;
+            if (arguments.length === 1) {
+                Object.each(arguments[0], function(partial, name) {
+                    that.addPartial(name, partial);
+                });
+                return;
+            }
+            that._partials[name] = partial;
+        },
+        /**
+	 * add a chunk for template
+	 * @param {string} name
+	 * @param {Template} chunk
+	 */
+        addChunk: function(name, chunk) {
+            var that = this;
+            that._chunks[name] = chunk;
+        },
+        /**
+	 * compile the template string
+	 * @param {string} tmplstr
+	 */
+        compile: function(tmplstr) {
+            var that = this;
+            if (tmplstr) {
+                that._init();
+                // compile and parse chunks
+                that._template = Template.compile(that, tmplstr);
+            }
+        },
+        getHtml: function() {
+            var that = this;
+            return that._html;
+        },
+        getNodeList: function() {
+            var that = this;
+            return that._nodeList.slice(0);
+        },
+        _wrap: function(html) {
+            var that = this, name = that._name, id = that._id, value = name + "/" + id, type = that._type, template = doc.createElement("div"), beginNode, endNode;
+            template.innerHTML = html;
+            beginNode = template.firstElementChild;
+            endNode = template.lastElementChild;
+            if (!beginNode) {
+                beginNode = doc.createElement("template");
+                if (template.firstChild) {
+                    template.insertBefore(beginNode, template.firstChild);
+                } else {
+                    template.appendChild(beginNode);
+                }
+            }
+            if (!endNode) {
+                endNode = doc.createElement("template");
+                template.appendChild(endNode);
+            }
+            beginNode.setAttribute(type + "-begin", value);
+            endNode.setAttribute(type + "-end", value);
+            that._html = template.innerHTML;
+            that._nodeList = [];
+            Object.each(template.childNodes, function(node) {
+                that._nodeList.push(node);
+            });
+        },
+        /**
+	 * parse the template with data
+	 * @param {object} data
+	 * @return the parsed string
+	 */
+        all: function(data) {
+            var that = this, root = that._root, helpers = that._helpers, name = that._name, data = data || that._data, html;
+            that._data = data;
+            if (root instanceof Template) {
+                helpers = Object.extend({}, root._helpers, helpers);
+            }
+            html = that._template(data, {
+                helpers: helpers
+            });
+            that._template2 = Handlebars.compile(html);
+            html = that._template2({}, {
+                partials: that._partials
+            });
+            that._wrap(html);
+            return that._html;
+        },
+        _replace: function() {
+            var that = this, name = that._name, id = that._id, type = that._type, nodes = that._nodeList, fragment = doc.createDocumentFragment(), beginNode, endNode, nextNode, parentNode;
+            beginNode = doc.querySelector("*[" + type + '-begin="' + name + "/" + id + '"]');
+            endNode = doc.querySelector("*[" + type + '-end="' + name + "/" + id + '"]');
+            parentNode = beginNode.parentNode || endNode.parentNode;
+            while (beginNode !== endNode) {
+                nextNode = beginNode.nextElementSibling;
+                parentNode.removeChild(beginNode);
+                beginNode = nextNode;
+            }
+            Object.each(nodes, function(node) {
+                fragment.appendChild(node);
+            });
+            parentNode.insertBefore(fragment, endNode);
+            parentNode.removeChild(endNode);
+        },
+        /**
+	 * update the chunk with data
+	 * @param {string} path, for special chunk
+	 * @param {object} data
+	 * @return the updated string
+	 */
+        update: function(path, chunkData) {
+            var that = this, template = doc.createElement("template"), split, chunk, chunkName, data, last;
+            split = typeof path === "string" ? path.split(/[.\/]/g) : path;
+            if (split.length) {
+                chunkName = split[0];
+                chunk = that._chunks[chunkName];
+                if (chunk) {
+                    // 更新的是某个chunk
+                    that._partials[chunkName] = chunk.update(split.slice(1), chunkData);
+                    that._html = that._template2({}, {
+                        partials: that._partials
+                    });
+                } else {
+                    // 更新的是某个chunk中的部分数据
+                    data = that._data;
+                    last = split.pop();
+                    Object.each(split, function(key) {
+                        data = data[key];
+                    });
+                    data[last] = chunkData;
+                    that.all();
+                    that._replace();
+                }
+            } else {
+                // 没有path的情况下，会更新整个模版
+                data = that._data;
+                if (Object.keys(data).length !== Object.keys(chunkData).length) {
+                    chunkData = Object.extend({}, data, chunkData);
+                }
+                that.all(chunkData);
+                that._replace();
+            }
+            return that._html;
+        },
+        /**
+	 * destroy the template
+	 */
+        destroy: function() {
+            var that = this, chunks = that._chunks;
+            Object.each(chunks, function(chunk) {
+                chunk.destroy();
+            });
+            delete that._template;
+            delete that._template2;
+            delete that._data;
+            delete that._chunks;
+        }
+    }), CHUNK_TAG = /(\{\{#chunk\s+[^}\s]+\s*[^}]*\}\})|(\{\{\/chunk\}\})/g, CHUNK_OPEN_TAG = /\{\{#chunk\s+([^}\s]+)\s*\}\}/, CHUNK_CLOSE_TAG = /\{\{\/chunk\}\}/, TemplateId = 1;
+    Template.id = function() {
+        return TemplateId++;
+    };
+    Template.helpers = function(tmpl) {
+        tmpl.addHelper("chunk", function(name) {
+            var chunk;
+            chunk = tmpl._chunks[name];
+            tmpl._partials[name] = chunk.all(this);
+            return new Handlebars.SafeString("{{> " + name + "}}");
+        });
+    };
+    Template.partials = function(tmpl) {};
+    Template.chunks = function(tmpl) {};
+    Template.compile = function(rootTmpl, text) {
+        var tagMatchs, openStack = [], subtmplStack = [];
+        tagMatchs = text.match(CHUNK_TAG);
+        tagMatchs && tagMatchs.forEach(function(tag) {
+            var openMatch, closeMatch, openTag, closeTag, openIdx, closeIdx, subtmpl, parentTmpl, lText, rText, name, chunk;
+            // find closeTag
+            closeMatch = tag.match(CHUNK_CLOSE_TAG);
+            if (closeMatch) {
+                // pop open stack
+                openMatch = openStack.pop();
+                subtmpl = subtmplStack.pop();
+                parentTmpl = subtmplStack.length ? subtmplStack[subtmplStack.length - 1] : rootTmpl;
+                // get tag and name
+                openTag = openMatch[0];
+                closeTag = closeMatch[0];
+                name = openMatch[1];
+                // index of open/close tag
+                openIdx = text.indexOf(openTag);
+                closeIdx = text.indexOf(closeTag);
+                // fetch the chunk text and update the text
+                lText = text.substring(0, openIdx);
+                chunk = text.substring(openIdx + openTag.length, closeIdx);
+                rText = text.substring(closeIdx + closeTag.length);
+                text = lText + "{{#with " + name + '}}{{chunk "' + name + '"}}{{/with}}' + rText;
+                // compile subtmpl
+                subtmpl._name = name;
+                subtmpl._root = parentTmpl;
+                subtmpl._type = "chunk";
+                subtmpl._template = Handlebars.compile(chunk);
+                parentTmpl.addChunk(name, subtmpl);
+            } else {
+                // push open stack
+                openMatch = tag.match(CHUNK_OPEN_TAG);
+                openStack.push(openMatch);
+                parentTmpl = new Template();
+                parentTmpl._init();
+                subtmplStack.push(parentTmpl);
+            }
+        });
+        return Handlebars.compile(text);
+    };
+    module.exports = Template;
 });

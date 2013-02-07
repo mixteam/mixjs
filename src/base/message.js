@@ -58,7 +58,7 @@ var Message = Class.create({
 
         if (!callback) return that;
 
-        if ((matches = events.match(AT_REG))) {
+        if (events && (matches = events.match(AT_REG))) {
             events = events.split(AT_SPLITER)[1];
         } else {
             matches = ['']
@@ -89,10 +89,11 @@ var Message = Class.create({
             return that;
         }
 
-        if (events && (matches = event.match(AT_REG))) {
+        if (events && (matches = events.match(AT_REG))) {
             events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
         } else {
             events = Object.keys(cache);
+            matches = [''];
         }
 
         // Loop through the callback list, splicing where appropriate.
