@@ -99,6 +99,7 @@ var Navigate = Class.create({
 				stateLimit = that._stateLimit,
 				stateLen = states.length,
 				move = that._move,
+				transition = that._transition,
 				datas = that._datas,
 
 				prev = states[stateIdx - 1],
@@ -113,9 +114,9 @@ var Navigate = Class.create({
 
 			if (move == null) {
 				if (!datas && that._stateEquals(prev, cur)) {
-					move = 'backward';
+					transition = move = 'backward';
 				} else {
-					move = 'forward';
+					transition = move = 'forward';
 				}
 			}
 
@@ -143,6 +144,7 @@ var Navigate = Class.create({
 			}
 
 			cur.move = move;
+			cur.transition = transition;
 			datas && (cur.datas = datas);
 
 			that._move = null;
@@ -227,6 +229,7 @@ var Navigate = Class.create({
 				;
 
 			that._move = 'forward';
+			that._transition = 'forward';
 
 			options || (options = {});
 
@@ -242,6 +245,10 @@ var Navigate = Class.create({
 						that._datas = Object.clone(options.datas);
 					}
 
+					if (options.transition === 'backward') {
+						that._transition = 'backward';
+					}
+
 					that._router.navigate(fragment + (args.length ? ARGS_SPLITER + args.join('&') : ''));
 				}
 			} else {
@@ -249,7 +256,7 @@ var Navigate = Class.create({
 			}
 		},
 
-		backward : function() {
+		backward : function(options) {
 			var that = this,
 				stateIdx = that._stateIdx
 				;
@@ -257,6 +264,14 @@ var Navigate = Class.create({
 			if (stateIdx === 0) return;
 
 			that._move = 'backward';
+			that._transition = 'backward';
+
+			options || (options = {});
+
+			if (options.transition === 'forward') {
+				that._transition = 'forward';
+			}
+
 			his.back();
 		}
 	})

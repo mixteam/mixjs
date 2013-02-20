@@ -462,7 +462,7 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
         on: function(events, callback, context) {
             var that = this, cache = that.__msgObj.cache, defaultContext = that.__msgObj.defaultContext, matches, event, list;
             if (!callback) return that;
-            if (matches = events.match(AT_REG)) {
+            if (events && (matches = events.match(AT_REG))) {
                 events = events.split(AT_SPLITER)[1];
             } else {
                 matches = [ "" ];
@@ -489,6 +489,7 @@ define("#mix/core/0.3.0/base/message-debug", [ "mix/core/0.3.0/base/reset-debug"
                 events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
             } else {
                 events = Object.keys(cache);
+                matches = [ "" ];
             }
             // Loop through the callback list, splicing where appropriate.
             while (event = events.shift()) {
@@ -768,7 +769,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             return true;
         },
         _pushState: function(name, fragment, params, args) {
-            var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
+            var that = this, states = that._states, stateIdx = that._stateIdx, stateLimit = that._stateLimit, stateLen = states.length, move = that._move, transition = that._transition, datas = that._datas, prev = states[stateIdx - 1], next = states[stateIdx + 1], cur = {
                 name: name,
                 fragment: fragment,
                 params: params,
@@ -776,9 +777,9 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             };
             if (move == null) {
                 if (!datas && that._stateEquals(prev, cur)) {
-                    move = "backward";
+                    transition = move = "backward";
                 } else {
-                    move = "forward";
+                    transition = move = "forward";
                 }
             }
             if (move === "backward") {
@@ -804,6 +805,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                 }
             }
             cur.move = move;
+            cur.transition = transition;
             datas && (cur.datas = datas);
             that._move = null;
             that._datas = null;
@@ -854,6 +856,7 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
         forward: function(fragment, options) {
             var that = this, states = that._states, stateIdx = that._stateIdx, cur = states[stateIdx] || {}, args = [];
             that._move = "forward";
+            that._transition = "forward";
             options || (options = {});
             if (fragment) {
                 if (options.datas || cur.fragment !== fragment) {
@@ -865,16 +868,24 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                     if (options.datas) {
                         that._datas = Object.clone(options.datas);
                     }
+                    if (options.transition === "backward") {
+                        that._transition = "backward";
+                    }
                     that._router.navigate(fragment + (args.length ? ARGS_SPLITER + args.join("&") : ""));
                 }
             } else {
                 his.forward();
             }
         },
-        backward: function() {
+        backward: function(options) {
             var that = this, stateIdx = that._stateIdx;
             if (stateIdx === 0) return;
             that._move = "backward";
+            that._transition = "backward";
+            options || (options = {});
+            if (options.transition === "forward") {
+                that._transition = "forward";
+            }
             his.back();
         }
     });
