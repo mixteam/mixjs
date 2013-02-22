@@ -33,6 +33,10 @@ var Util = Class.create({
 	},
 
 	str2val : function(str) {
+		if (str == null || str == undefined || str == NaN) {
+			return str;
+		}
+
 		str += '';
 
 		if (str === 'true' || str === 'false') {

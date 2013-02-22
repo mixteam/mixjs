@@ -86,11 +86,13 @@ Class.Mutators = {
 
   'Implements': function(items) {
     Object.isTypeof(items, 'array') || (items = [items]);
-    var proto = this.prototype, item;
+    var proto = this.prototype, item, constructor = proto.constructor;
 
     while (item = items.shift()) {
       Object.extend(proto, item.prototype || item);
     }
+
+    proto.constructor = constructor;
   },
 
   'Statics': function(staticProperties) {

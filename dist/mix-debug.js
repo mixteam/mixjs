@@ -584,7 +584,7 @@ define("#mix/core/0.3.0/base/util-debug", [ "mix/core/0.3.0/base/reset-debug", "
         '"': "&quot;",
         "'": "&#x27;",
         "/": "&#x2F;"
-    }, ctor = function() {}, funcBind = Function.prototype.bind;
+    }, isNumber = /^[-+]?\d\d*\.?\d\d*/;
     // Regex containing the keys listed immediately above.
     var htmlEscaper = /[&<>"'\/]/g;
     var Util = Class.create({
@@ -595,20 +595,15 @@ define("#mix/core/0.3.0/base/util-debug", [ "mix/core/0.3.0/base/reset-debug", "
                 return htmlEscapes[match];
             });
         },
-        // Bind context to a function
-        bind: function(func, context) {
-            var args = Array.make(arguments), _args, bound;
-            if (!Object.isTypeof(func, "function")) throw new TypeError();
-            if (func.bind === funcBind && funcBind) return funcBind.apply(func, slice.call(arguments, 1));
-            _args = args.slice(2);
-            return bound = function() {
-                if (!(this instanceof bound)) return func.apply(context, _args.concat(args));
-                ctor.prototype = func.prototype;
-                var self = new ctor();
-                var result = func.apply(self, _args.concat(args));
-                if (Object(result) === result) return result;
-                return self;
-            };
+        str2val: function(str) {
+            str += "";
+            if (str === "true" || str === "false") {
+                return str === "true" ? true : false;
+            } else if (isNumber.test(str)) {
+                return parseFloat(str);
+            } else {
+                return str;
+            }
         }
     });
     Util.singleton = new Util();

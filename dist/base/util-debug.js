@@ -21,6 +21,9 @@ define("#mix/core/0.3.0/base/util-debug", [ "mix/core/0.3.0/base/reset-debug", "
             });
         },
         str2val: function(str) {
+            if (str == null || str == undefined || str == NaN) {
+                return str;
+            }
             str += "";
             if (str === "true" || str === "false") {
                 return str === "true" ? true : false;
