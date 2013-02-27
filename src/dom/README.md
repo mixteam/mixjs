@@ -568,8 +568,8 @@ eg:$('dl dt').next()   //=> the DD elements
 
 > unwrap() self
 
-`eg:$(document.body).append('<div id=wrapper><p>Content</p></div>')
-$('#wrapper p').unwrap().parents()  //=[<body>, <html>]`
+$(document.body).append('<div id="wrapper"><p>Content</p></div>')
+$('#wrapper p').unwrap().parents()  //=[<body>, <html>]
 
 
  val
@@ -694,18 +694,18 @@ animate
 show
 
 ----------
-> show()  ⇒ self
+> show()  self
 
 hide
 
 ----------
-> hide()  ⇒ self
+> hide()  self
 
 toggle
 
 ----------
 
-> toggle([setting])  ⇒ self
+> toggle([setting])  self
 
 fadeTo 
 

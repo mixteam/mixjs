@@ -30,20 +30,24 @@
         "*/*.js" : ".",
 
         "mix.js" : {
-            "main" : "base/reset.js",
+            "main" : "./base/reset",
             "includes" : [
-                "cjs",
-                "reset",
-                "class",
-                "message",
-                "util",
-                "router",
-                "navigate",
-                "selector",
-                "event",
-                "ajax",
-                "animation",
-                "template"
+                "./base/reset",
+                "./base/class",
+                "./base/message",
+                "./base/util",
+                "./url/router",
+                "./url/navigate"
+            ]
+        },
+
+        "mix-dom.js" : {
+            "main" : "./dom/selector",
+            "includes" : [
+                "./dom/selector",
+                "./dom/ajax.js",
+                "./dom/event.js",
+                "./dom/animation.js"
             ]
         }
     }
