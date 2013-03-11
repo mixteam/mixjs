@@ -92,13 +92,13 @@ var Message = Class.create({
         if (events && (matches = events.match(AT_REG))) {
             events = events.split(AT_SPLITER)[1].split(SPLITER_REG);
         } else {
-            events = Object.keys(cache);
+            events = events ? events.split(SPLITER_REG) : Object.keys(cache);
             matches = [''];
         }
 
         // Loop through the callback list, splicing where appropriate.
         while (event = events.shift()) {
-            event = matches[0] + events;
+            event = matches[0] + event;
             list = cache[event];
             if (!list) continue;
 
@@ -198,7 +198,8 @@ var Message = Class.create({
         var that = this
             ;
 
-        console.log('[(' + that.__msgObj.id + ')' + that.__msgObj.name + ']' + msg);
+        console.log('[(' + that.__msgObj.id + ')' + that.__msgObj.name + ']', 
+            {id:that.__msgObj.id, name:that.__msgObj.name, msg:msg});
     }
 });
 
