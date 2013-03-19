@@ -145,7 +145,7 @@ var Navigate = Class.create({
 
 			cur.move = move;
 			cur.transition = transition;
-			datas && (cur.datas = datas);
+			cur.datas = datas || {};
 
 			that._move = null;
 			that._datas = null;
