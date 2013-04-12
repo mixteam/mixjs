@@ -107,8 +107,8 @@ var Navigate = Class.create({
 				cur = {
 					name : name,
 					fragment : fragment,
-					params : params,
-					args : args
+					params : params || {},
+					args : args || {}
 				}
 				;
 

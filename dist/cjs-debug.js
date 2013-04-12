@@ -4,7 +4,7 @@
 */
 (function(win, doc, undef) {
     if (win["define"]) return;
-    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, modules = win["modules"] || (win["modules"] = {}), scope = modules, cjs = win, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
+    var NS_SEP = "/", ID_REG_PREFIX = /^#/, ID_REG_POSTFIX = /\.js$/i, scope = modules = win["modules"] || (win["modules"] = {}), cjs = win, head = win.head || doc.head, basePath = "", aliasReg = [], aliasRep = [], resolvedId = {};
     function parseId(id, useAlias) {
         if (resolvedId[id]) {
             return resolvedId[id];
