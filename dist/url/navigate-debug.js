@@ -55,7 +55,8 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                 name: name,
                 fragment: fragment,
                 params: params || {},
-                args: args || {}
+                args: args || {},
+                datas: datas || {}
             };
             if (move == null) {
                 if (!datas && that._stateEquals(prev, cur)) {
@@ -80,6 +81,8 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
                 } else if (!datas && that._stateEquals(next, cur)) {
                     stateIdx++;
                     cur = next;
+                } else if (that._stateEquals(states[stateIdx], cur)) {
+                    cur = states[stateIdx];
                 } else {
                     stateIdx++;
                     states.splice(stateIdx);
@@ -88,7 +91,6 @@ define("#mix/core/0.3.0/url/navigate-debug", [ "mix/core/0.3.0/base/reset-debug"
             }
             cur.move = move;
             cur.transition = transition;
-            cur.datas = datas || {};
             that._move = null;
             that._datas = null;
             that._stateIdx = stateIdx;

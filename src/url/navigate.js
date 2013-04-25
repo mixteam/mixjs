@@ -108,7 +108,8 @@ var Navigate = Class.create({
 					name : name,
 					fragment : fragment,
 					params : params || {},
-					args : args || {}
+					args : args || {},
+					datas : datas || {}
 				}
 				;
 
@@ -136,6 +137,8 @@ var Navigate = Class.create({
 				} else if (!datas && that._stateEquals(next, cur)){
 					stateIdx++;
 					cur = next;
+				} else if (that._stateEquals(states[stateIdx], cur)){
+					cur = states[stateIdx];
 				} else {
 					stateIdx++;
 					states.splice(stateIdx);
@@ -145,7 +148,6 @@ var Navigate = Class.create({
 
 			cur.move = move;
 			cur.transition = transition;
-			cur.datas = datas || {};
 
 			that._move = null;
 			that._datas = null;
