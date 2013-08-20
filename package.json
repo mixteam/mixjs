@@ -1,0 +1,54 @@
+{
+    "name" : "mix/core",
+    "root" : "#",
+    "version" : "0.3.0",
+    "description" : "Mix JS",
+    "license" : "MIT",
+    "author" : "zhuxun <zhuxun.jb@taobao.com>",
+    "homepage": "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "git@github.com:mixteam/mixjs_core.git"
+    },
+    "dependencies" : {
+        "handlebars" : "mix/libs/handlebars/1.0.5/handlebars",
+        "cjs" : "mix/core/0.3.0/cjs",
+        "reset" : "mix/core/0.3.0/base/reset",
+        "class" : "mix/core/0.3.0/base/class",
+        "message" : "mix/core/0.3.0/base/message",
+        "util" : "mix/core/0.3.0/base/util",
+        "router" : "mix/core/0.3.0/url/router",
+        "navigate" : "mix/core/0.3.0/url/navigate",
+        "selector" : "mix/core/0.3.0/dom/selector",
+        "event" : "mix/core/0.3.0/dom/event",
+        "ajax" : "mix/core/0.3.0/dom/ajax",
+        "animation" : "mix/core/0.3.0/dom/animation",
+        "template" : "mix/core/0.3.0/ui/template"
+    },
+    "output" : {
+        "*.js" : ".",
+        "*/*.js" : ".",
+
+        "mix.js" : {
+            "main" : "./base/reset",
+            "includes" : [
+                "./base/reset",
+                "./base/class",
+                "./base/message",
+                "./base/util",
+                "./url/router",
+                "./url/navigate"
+            ]
+        },
+
+        "mix-dom.js" : {
+            "main" : "./dom/selector",
+            "includes" : [
+                "./dom/selector",
+                "./dom/ajax.js",
+                "./dom/event.js",
+                "./dom/animation.js"
+            ]
+        }
+    }
+}

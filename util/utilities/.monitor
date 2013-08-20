@@ -1,3 +1,0 @@
-[spm build -compiler=closure]
-./package.json
-./src/utilities.js
